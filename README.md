@@ -10,7 +10,7 @@ CaMo unterstützt Studierende der DHBW Technik bei einer effizienten und stressf
 | 2 | Suchen und favorisieren von Verbindungen | 🟠 (should have) |
 | 3 | Push-Benachrichtigung bei Verspätungen/Störungen von farvorisierten Fahrten | 🟠 (should have) |
 | 4 | Interaktive Karte mit den Haltestellen in der Umgebung, inkl. Wegbeschreibung | 🟡 (could have) |
-| 5 | Stundenplan integrieren und automatisch Verbindungen anzeigen, entsprechend der präferierten Pufferzeit | 🟡 (could have) |
+| 5 | Stundenplan integrieren undautomatisch Verbindungen anzeigen, entsprechend der präferierten Pufferzeit | 🟡 (could have) |
 | 6 | Fahrscheine/Tickets kaufen | 🟢 (won't have) |
 
 ## 3. Nicht Funktionale Anforderungen

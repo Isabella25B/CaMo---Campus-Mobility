@@ -1,0 +1,25 @@
+name: Generate PlantUML Diagrams
+
+on:
+  push:
+    paths:
+      - 'docs/plantuml/**/*.puml'
+  workflow_dispatch:
+
+jobs:
+  generate_plantuml:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Render PlantUML to SVG
+        uses: grassedge/generate-plantuml-action@v1.5
+        with:
+          path: docs/plantuml          # Eingabe-Verzeichnis mit .puml-Dateien
+          output: docs/diagrams        # Ausgabe-Verzeichnis für .svg
+          message: "Render PlantUML files"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
