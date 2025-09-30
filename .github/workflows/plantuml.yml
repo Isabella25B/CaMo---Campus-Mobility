@@ -9,6 +9,8 @@ on:
 jobs:
   generate_plantuml:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     name: Render C4 PlantUML
     steps:
       - name: Checkout repository
