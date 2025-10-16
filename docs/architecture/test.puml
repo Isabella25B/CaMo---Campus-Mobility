@@ -1,3 +1,32 @@
 @startuml
-Alice -> Bob: Hello Bob!
+title Aktivitätsdiagramm: Benachrichtigung bei Störung einer Favoriten-Verbindung
+
+start
+
+:Tim öffnet die ÖPNV-App;
+:App überwacht alle gespeicherten Favoriten-Verbindungen;
+
+fork
+  :App ruft regelmäßig aktuelle Verkehrsdaten vom Server ab;
+fork again
+  :Server sendet Echtzeitdaten über Verspätungen und Störungen;
+end fork
+
+if (Störung oder Verspätung erkannt?) then (ja)
+  :App prüft, ob betroffene Verbindung als Favorit markiert ist;
+  if (Favorit betroffen?) then (ja)
+    fork
+      :Push-Benachrichtigung an Tim senden;
+      :Details (Verspätung, Ursache, Alternativen) anzeigen;
+    fork again
+      :App aktualisiert Anzeige der Verbindung in der Favoritenliste;
+    end fork
+  else (nein)
+    :Keine Benachrichtigung nötig;
+  endif
+else (nein)
+  :Keine Aktion erforderlich;
+endif
+
+stop
 @enduml
