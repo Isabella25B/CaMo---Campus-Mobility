@@ -17,12 +17,13 @@ if (Eingaben vollständig und gültig?) then (Ja)
         stop
     else (Nein)
         :Nutzer bricht Suche ab;
-        --> [Abbruch] end
+        end
     endif
 
 else (Nein)
     :Fehlermeldung anzeigen;
-    --> [Abbruch] end
+    end
 endif
 
 @enduml
+
