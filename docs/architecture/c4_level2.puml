@@ -2,40 +2,68 @@
 ' C4-PlantUML Container diagram include (remote)
 !includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
 
-' optional: set skinparams oder Theme (siehe Repo für Varianten)
+' optional: Skin/Theme anpassen
 
 ' Titel
 LAYOUT_WITH_LEGEND()
+' (Falls deine Umgebung LAYOUT_WITH_LEGEND nicht kennt, ersetze durch LAYOUT_LEFT_RIGHT())
 
-' Definiere Actor
-Person(person, "Student*in", "studiert an der DHBW Technik und nutzt CaMo für eine effiziente An- und Abfahrt.")
+' ---- Actor
+Person(person, "Student*in", "studiert an der DHBW Technik")
 
-' Definiere System (Boundary) und Container
-System_Boundary(camo, "CaMo – Campus Mobility") {
+' ---- System unter Design (Boundary) + Container
+System_Boundary(camo, "CaMo - Campus Mobility") {
 
-  Container(web, "Web App", "React / PWA", 
-    "Stellt die Benutzeroberfläche bereit und kommuniziert über HTTPS mit dem Backend.")
+  ' Clients
+  Container(web,    "Web App",    "React/PWA",          "Browser-UI: Suche, Karte, Favoriten, Einstellungen")
+  Container(mobile, "Mobile App", "Flutter (optional)",  "Mobile-UI: Offline-Favoriten, Push-Opt-in, Karte")
 
-  Container(api, "Backend API", "Java / Spring Boot", 
-    "Verarbeitet Suchanfragen, verwaltet Favoriten und sendet E-Mails über das interne E-Mail-System.")
+  ' Backend
+  Container(api,   "Backend API", "Java Spring Boot",   "REST/WebSocket: Verbindungs-Suche, Favoriten, Stundenplan-Bridge")
+  ContainerDb(db,  "Operational DB", "PostgreSQL",      "Favoriten, Profile/Consent, Snapshots/Logs")
+  Container(cache, "Cache",          "Redis",            "Kurzlebige Live-Daten (Abfahrten, Störungen)")
 
-  ContainerDb(db, "Datenbank", "PostgreSQL", 
-    "Speichert Nutzerkonten, Favoriten, Verbindungsdaten und Logs.")
+  ' Hintergrundprozesse
+  Container(rt,   "Realtime Ingest",   "Job/Worker",     "Liest GTFS-RT, normalisiert und aktualisiert Cache/DB")
+  Container(push, "Push Orchestrator", "Job/Worker",     "Erkennt Verspätungen/Störungen und triggert Push")
+  Container(adapter, "Push-Adapter",   "Service",        "Kapselt Kommunikation zum externen Push-Provider (Queue/Retry)")
 }
 
-' Externes System
-System_Ext(mail, "E-Mail-System", "SMTP-Server", 
-  "Versendet Benachrichtigungen und Passwort-Resets.")
+' ---- Externe Systeme
+System_Ext(vvs,  "VVS-API",   "ÖPNV-Fahrplandaten + Live-Updates (GTFS/GTFS-RT)")
+System_Ext(maps, "Google/OSM","Kartenkacheln, Geocoding, Weg zum Halt")
+System_Ext(pxp,  "Push-Dienst","FCM/APNs für Benachrichtigungen")
+System_Ext(rapla,"Rapla",     "Vorlesungsplan der Studierenden")
+System_Ext(auth, "Auth-Provider", "Login/OIDC (optional)")
 
-' Beziehungen
-Rel(person, web, "nutzt die Weboberfläche", "HTTPS")
-Rel(web, api, "ruft REST-Endpunkte auf", "HTTPS / JSON")
-Rel(api, db, "liest und schreibt Daten", "JDBC / SQL")
-Rel(api, mail, "sendet E-Mails über", "SMTP")
+' ---- Beziehungen (Verb + Technologie)
+Rel(person, web,    "nutzt", "HTTPS")
+Rel(person, mobile, "nutzt", "HTTPS")
 
-' Rückflüsse
-Rel_D(api, web, "liefert Suchergebnisse, Bestätigungen und Fehlerhinweise")
+Rel(web,    api, "ruft REST-Endpunkte auf", "HTTPS/JSON")
+Rel(mobile, api, "ruft REST-Endpunkte auf", "HTTPS/JSON")
+
+Rel(api, db,    "liest/schreibt", "JDBC/SQL")
+Rel(api, cache, "liest Live-Daten", "TCP/RESP")
+Rel(api, rapla, "liest persönliche Slots (Consent)", "HTTPS/REST")
+Rel(api, maps,  "Geocoding/Kacheln/Route", "HTTPS")
+Rel(api, auth,  "Login/OIDC", "OAuth2/OIDC")
+
+Rel(rt,  vvs,   "holt GTFS/GTFS-RT", "HTTPS")
+Rel(rt,  cache, "aktualisiert Live-Daten")
+Rel(rt,  db,    "persistiert Snapshots/Logs")
+
+Rel(push, api,    "holt Favoriten/Subscriptions")
+Rel(push, adapter,"sendet Push-Events")
+Rel(adapter, pxp, "liefert Benachrichtigungen", "HTTPS")
+Rel_D(pxp, mobile,"stellt Push zu")
+Rel_D(pxp, web,   "stellt Web-Push zu (optional)")
+
+' Rückflüsse zur UI
+Rel_D(api, web,    "liefert Ergebnisse, Karte, Abfahrtszeiten, Fehler")
+Rel_D(api, mobile, "liefert Ergebnisse, Karte, Abfahrtszeiten, Fehler")
 
 ' Ausgabe: Containerdiagramm
 SHOW_LEGEND()
 @enduml
+
