@@ -3,7 +3,7 @@
 !includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
 
 ' Titel
-LAYOUT_WITH_LEGEND()
+LAYOUT_LEFT_RIGHT()
 
 ' ---- Actor
 Person(student, "Student*in", "nutzt CaMo, um ÖPNV-Verbindungen zu suchen, Favoriten zu speichern und Benachrichtigungen zu erhalten.")
