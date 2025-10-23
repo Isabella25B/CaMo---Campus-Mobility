@@ -2,13 +2,15 @@
 ' C4-PlantUML Container diagram include (remote)
 !includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
 
+' optional: set skinparams oder Theme (siehe Repo für Varianten)
+
 ' Titel
-LAYOUT_LEFT_RIGHT()
+LAYOUT_WITH_LEGEND()
 
-' ---- Actor
-Person(student, "Student*in", "nutzt CaMo, um ÖPNV-Verbindungen zu suchen, Favoriten zu speichern und Benachrichtigungen zu erhalten.")
+' Definiere Actor
+Person(person, "Student*in", "studiert an der DHBW Technik und nutzt CaMo für eine effiziente An- und Abfahrt.")
 
-' ---- System unter Design (CaMo)
+' Definiere System (Boundary) und Container
 System_Boundary(camo, "CaMo – Campus Mobility") {
 
   Container(web, "Web App", "React / PWA", 
@@ -21,16 +23,18 @@ System_Boundary(camo, "CaMo – Campus Mobility") {
     "Speichert Nutzerkonten, Favoriten, Verbindungsdaten und Logs.")
 }
 
-' ---- Externes System
+' Externes System
 System_Ext(mail, "E-Mail-System", "SMTP-Server", 
   "Versendet Benachrichtigungen und Passwort-Resets.")
 
-' ---- Beziehungen
-Rel(student, web, "nutzt", "HTTPS")
+' Beziehungen
+Rel(person, web, "nutzt die Weboberfläche", "HTTPS")
 Rel(web, api, "ruft REST-Endpunkte auf", "HTTPS / JSON")
-Rel(api, db, "liest / schreibt", "JDBC / SQL")
+Rel(api, db, "liest und schreibt Daten", "JDBC / SQL")
 Rel(api, mail, "sendet E-Mails über", "SMTP")
-Rel_D(api, web, "liefert Suchergebnisse und Bestätigungen")
+
+' Rückflüsse
+Rel_D(api, web, "liefert Suchergebnisse, Bestätigungen und Fehlerhinweise")
 
 ' Ausgabe: Containerdiagramm
 SHOW_LEGEND()
