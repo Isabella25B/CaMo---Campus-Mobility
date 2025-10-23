@@ -1,0 +1,19 @@
+@startuml C4_Context_Example
+' C4-PlantUML Context diagram include (remote)
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+' optional: set skinparams oder Theme (siehe Repo für Varianten)
+
+' Titel
+LAYOUT_WITH_LEGEND()
+
+' Definiere System und Actor
+Person(customer, "Customer", "A customer of the bank")
+System(banking_system, "Internet Banking System", "Allows customers to view balances and make payments")
+
+' Beziehungen
+Rel(customer, banking_system, "Uses", "HTTPS")
+
+' Ausgabe: Kontextdiagramm
+SHOW_LEGEND()
+@enduml
