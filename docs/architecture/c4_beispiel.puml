@@ -19,11 +19,12 @@ System_Ext(plan, "Stundenplan-System (Rapla)", "Vorlesungsplan der Studierenden
 System_Ext(marcel, "...", "Externe Dienste (Login, ...)")
 
 ' Beziehungen
-Rel(person, camo, "benutzt", "sucht & favorisiert Verbindungen; öffnet Karte; verlinkt Stundenplan")
-Rel(camo, vvs,  "ruft Fahrplan + Echtzeitdaten ab", "")
-Rel(camo, maps, "Weg zum Halt anzeigen", "")
-Rel(camo, push, "versendet Verspätungs-/Störungs-Push", "")
-Rel(camo, plan, "liest Stundenplan, berechnet Ankunftszeiten", "")
+Rel(person, camo, "sucht & favorisiert Verbindungen; öffnet Karte; verlinkt Stundenplan")
+Rel(camo, vvs,  "ruft Fahrplan + Echtzeitdaten ab")
+Rel(camo, maps, "Weg zum Halt anzeigen")
+Rel(camo, push, "versendet Verspätungs-/Störungs-Push")
+Rel(camo, plan, "liest Stundenplan, berechnet Ankunftszeiten")
+Rel(camo, marcel, "nutzt")
 
 ' Rückflüsse
 Rel_D(camo, person, "zeigt Ergebnisse, Karte, Abfahrtszeiten, Fehlerhinweise an")
