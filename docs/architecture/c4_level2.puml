@@ -1,56 +1,69 @@
 @startuml C4_Container_CaMo
-' C4-PlantUML Container include (remote)
+' C4-PlantUML Container diagram include (remote)
 !includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
 
+' optional: Skin/Theme anpassen
+
+' Titel
 LAYOUT_WITH_LEGEND()
+' (Falls deine Umgebung LAYOUT_WITH_LEGEND nicht kennt, ersetze durch LAYOUT_LEFT_RIGHT())
 
 ' ---- Actor
-Person(student, "Student*in", "Nutzt CaMo für Suche, Favoriten, Karte und Benachrichtigungen")
+Person(person, "Student*in", "studiert an der DHBW Technik")
 
-' ---- Externe Systeme (wie in Level 1)
-System_Ext(vvs,  "VVS-API", "ÖPNV-Fahrplandaten + Live-Updates")
-System_Ext(maps, "Karten-API", "Karte/Geocoding (z. B. Google/OSM)")
-System_Ext(pushP, "Push-Provider", "externer Push-Dienst")
-System_Ext(rapla, "Rapla", "Stundenplan-System")
-System_Ext(auth, "Auth-Provider", "Login/OAuth (falls genutzt)")
-
-' ---- System Boundary CaMo (Level 2: Container)
+' ---- System unter Design (Boundary) + Container
 System_Boundary(camo, "CaMo - Campus Mobility") {
 
-  Container(app, "Client-App", "Web/Mobil (z. B. React/PWA)", 
-    "UI für Suche, Favoriten, Karte; spricht REST/WebSocket zum Backend")
+  ' Clients
+  Container(web,    "Web App",    "React/PWA",          "Browser-UI: Suche, Karte, Favoriten, Einstellungen")
+  Container(mobile, "Mobile App", "Flutter (optional)",  "Mobile-UI: Offline-Favoriten, Push-Opt-in, Karte")
 
-  Container(api, "Backend-API", "Service (z. B. Node/Express, Django, FastAPI)",
-    "REST-/WebSocket-Endpunkte: Verbindungs-Suche, Favoriten, Stundenplan-Import, Karten-Proxy, Health")
+  ' Backend
+  Container(api,   "Backend API", "Java Spring Boot",   "REST/WebSocket: Verbindungs-Suche, Favoriten, Stundenplan-Bridge")
+  ContainerDb(db,  "Operational DB", "PostgreSQL",      "Favoriten, Profile/Consent, Snapshots/Logs")
+  Container(cache, "Cache",          "Redis",            "Kurzlebige Live-Daten (Abfahrten, Störungen)")
 
-  ContainerDb(store, "Persistenz", "DB/Cache (z. B. PostgreSQL/Redis)",
-    "Speichert Favoriten, User-Profile/Settings, ggf. Caches für Fahr-/Abfahrtszeiten")
-
-  Container(worker, "Worker/Scheduler", "Job-Runner (z. B. cron/queue)",
-    "Periodische Jobs: Live-Updates prüfen, Verspätungen erkennen, Push-Events auslösen")
-
-  Container(pushSvc, "Push-Service (Adapter)", "interner Adapter",
-    "Kapselt Kommunikation zum externen Push-Provider; Queue/Retry/Rate-Limits")
+  ' Hintergrundprozesse
+  Container(rt,   "Realtime Ingest",   "Job/Worker",     "Liest GTFS-RT, normalisiert und aktualisiert Cache/DB")
+  Container(push, "Push Orchestrator", "Job/Worker",     "Erkennt Verspätungen/Störungen und triggert Push")
+  Container(adapter, "Push-Adapter",   "Service",        "Kapselt Kommunikation zum externen Push-Provider (Queue/Retry)")
 }
 
-' ---- Beziehungen: Nutzer ↔ App ↔ Backend
-Rel(student, app, "nutzt über Browser/Smartphone")
-Rel(app, api, "REST/JSON + optional WebSocket", "HTTPS/WSS")
-Rel(api, store, "CRUD / Caching", "SQL/Key-Value")
-Rel(api, vvs, "holt Fahrplan- und Echtzeitdaten", "HTTPS")
-Rel(api, maps, "Karten-/Routing-Requests (optional Proxy)", "HTTPS")
-Rel(api, rapla, "importiert Stundenplan", "HTTPS")
-Rel(api, auth, "Login/OAuth (optional)", "OIDC/OAuth2")
+' ---- Externe Systeme
+System_Ext(vvs,  "VVS-API",   "ÖPNV-Fahrplandaten + Live-Updates (GTFS/GTFS-RT)")
+System_Ext(maps, "Google/OSM","Kartenkacheln, Geocoding, Weg zum Halt")
+System_Ext(pxp,  "Push-Dienst","FCM/APNs für Benachrichtigungen")
+System_Ext(rapla,"Rapla",     "Vorlesungsplan der Studierenden")
+System_Ext(auth, "Auth-Provider", "Login/OIDC (optional)")
 
-' ---- Push-Fluss
-Rel(worker, vvs,  "pollt/abonniert Echtzeitdaten", "HTTPS")
-Rel(worker, store, "liest Favoriten/Subscriptions", "SQL/Key-Value")
-Rel(worker, pushSvc, "sendet Benachrichtigungs-Events")
-Rel(pushSvc, pushP, "liefert Push an Provider", "HTTPS")
-Rel_D(pushP, student, "stellt Push-Benachrichtigungen zu")
+' ---- Beziehungen (Verb + Technologie)
+Rel(person, web,    "nutzt", "HTTPS")
+Rel(person, mobile, "nutzt", "HTTPS")
 
-' ---- Rückflüsse/Antworten
-Rel_D(api, app, "liefert Suchergebnisse, Abfahrtszeiten, Karten-Infos, Fehlerhinweise")
+Rel(web,    api, "ruft REST-Endpunkte auf", "HTTPS/JSON")
+Rel(mobile, api, "ruft REST-Endpunkte auf", "HTTPS/JSON")
 
+Rel(api, db,    "liest/schreibt", "JDBC/SQL")
+Rel(api, cache, "liest Live-Daten", "TCP/RESP")
+Rel(api, rapla, "liest persönliche Slots (Consent)", "HTTPS/REST")
+Rel(api, maps,  "Geocoding/Kacheln/Route", "HTTPS")
+Rel(api, auth,  "Login/OIDC", "OAuth2/OIDC")
+
+Rel(rt,  vvs,   "holt GTFS/GTFS-RT", "HTTPS")
+Rel(rt,  cache, "aktualisiert Live-Daten")
+Rel(rt,  db,    "persistiert Snapshots/Logs")
+
+Rel(push, api,    "holt Favoriten/Subscriptions")
+Rel(push, adapter,"sendet Push-Events")
+Rel(adapter, pxp, "liefert Benachrichtigungen", "HTTPS")
+Rel_D(pxp, mobile,"stellt Push zu")
+Rel_D(pxp, web,   "stellt Web-Push zu (optional)")
+
+' Rückflüsse zur UI
+Rel_D(api, web,    "liefert Ergebnisse, Karte, Abfahrtszeiten, Fehler")
+Rel_D(api, mobile, "liefert Ergebnisse, Karte, Abfahrtszeiten, Fehler")
+
+' Ausgabe: Containerdiagramm
 SHOW_LEGEND()
 @enduml
+
