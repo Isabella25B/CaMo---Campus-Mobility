@@ -14,8 +14,8 @@ System(camo, "CaMo - Campus Mobility", "Sorgt für eine effiziente und stressfre
 ' Externe Systeme
 System_Ext(vvs,  "VVS-API", "ÖPNV-Fahrplandaten + Live-Updates")
 System_Ext(maps, "Google/OSM", "Karte mit Haltestellen in der Umgebung")
-System_Ext(push, "Push-Dienst", "FCM/APNs für Benachrichtigungen.")
-System_Ext(plan, "Stundenplan-System (Rapla)", "Vorlesungsplan der Studierenden.")
+System_Ext(push, "Push-Dienst", "für Benachrichtigungen.")
+System_Ext(plan, "Rapla", "Vorlesungsplan der Studierenden.")
 System_Ext(marcel, "...", "Externe Dienste (Login, ...)")
 
 ' Beziehungen
