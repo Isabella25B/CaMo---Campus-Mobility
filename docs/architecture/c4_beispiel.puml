@@ -8,11 +8,27 @@
 LAYOUT_WITH_LEGEND()
 
 ' Definiere System und Actor
-Person(customer, "Customer", "A customer of the bank")
-System(banking_system, "Internet Banking System", "Allows customers to view balances and make payments")
+Person(person, "Student*in", "studiert an der DHBW Technik")
+System(camo, "CaMo - Campus Mobility", "Sorgt für eine effiziente und stressfreie An- und Abfahrt zur DHBW Technik.")
+
+' Externe Systeme
+System_Ext(vvs,  "VVS-API", "ÖPNV-Fahrplandaten + Live-Updates")
+System_Ext(maps, "Google/OSM", "Karte mit Haltestellen in der Umgebung")
+System_Ext(push, "Push-Dienst", "FCM/APNs für Benachrichtigungen.")
+System_Ext(plan, "Stundenplan-System (Rapla)", "Vorlesungsplan der Studierenden.")
+System_Ext(marcel, "...", "Externe Dienste (Login, ...)")
 
 ' Beziehungen
-Rel(customer, banking_system, "Uses", "HTTPS")
+Rel(person, camo, "benutzt", "sucht & favorisiert Verbindungen; öffnet Karte; verlinkt Stundenplan")
+Rel(camo, vvs,  "ruft Fahrplan + Echtzeitdaten ab", "")
+Rel(camo, maps, "Weg zum Halt anzeigen", "")
+Rel(camo, push, "versendet Verspätungs-/Störungs-Push", "")
+Rel(camo, plan, "liest Stundenplan, berechnet Ankunftszeiten", "")
+
+' Rückflüsse
+Rel_D(camo, person, "zeigt Ergebnisse, Karte, Abfahrtszeiten, Fehlerhinweise an")
+Rel_D(push, person, "sendet Push-Benachrichtigungen")
+
 
 ' Ausgabe: Kontextdiagramm
 SHOW_LEGEND()
