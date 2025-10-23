@@ -25,7 +25,7 @@ System_Boundary(camo, "CaMo - Campus Mobility") {
 ' ---- Externe Systeme
 System_Ext(mail, "E-Mail-System", "SMTP-Server", "Versendet Benachrichtigungen und Passwort-Resets.")
 
-' ---- Beziehungen (Verb + Technologie)
+' ---- Beziehungen 
 Rel(student, web, "nutzt", "HTTPS") 
 Rel(web, api, "ruft REST-Endpunkte auf", "HTTPS / JSON") 
 Rel(api, db, "liest / schreibt", "JDBC / SQL") 

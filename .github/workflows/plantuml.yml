@@ -26,3 +26,11 @@ jobs:
           message: "Render PlantUML files"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Render PlantUML to PNG
+        uses: grassedge/generate-plantuml-action@v1.5
+        with:
+          path: docs/diagrams
+          format: png
+          message: "Render PlantUML PNG files"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
