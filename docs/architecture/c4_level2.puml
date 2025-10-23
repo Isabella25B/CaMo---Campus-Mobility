@@ -1,0 +1,56 @@
+@startuml C4_Container_CaMo
+' C4-PlantUML Container include (remote)
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_WITH_LEGEND()
+
+' ---- Actor
+Person(student, "Student*in", "Nutzt CaMo für Suche, Favoriten, Karte und Benachrichtigungen")
+
+' ---- Externe Systeme (wie in Level 1)
+System_Ext(vvs,  "VVS-API", "ÖPNV-Fahrplandaten + Live-Updates")
+System_Ext(maps, "Karten-API", "Karte/Geocoding (z. B. Google/OSM)")
+System_Ext(pushP, "Push-Provider", "externer Push-Dienst")
+System_Ext(rapla, "Rapla", "Stundenplan-System")
+System_Ext(auth, "Auth-Provider", "Login/OAuth (falls genutzt)")
+
+' ---- System Boundary CaMo (Level 2: Container)
+System_Boundary(camo, "CaMo - Campus Mobility") {
+
+  Container(app, "Client-App", "Web/Mobil (z. B. React/PWA)", 
+    "UI für Suche, Favoriten, Karte; spricht REST/WebSocket zum Backend")
+
+  Container(api, "Backend-API", "Service (z. B. Node/Express, Django, FastAPI)",
+    "REST-/WebSocket-Endpunkte: Verbindungs-Suche, Favoriten, Stundenplan-Import, Karten-Proxy, Health")
+
+  ContainerDb(store, "Persistenz", "DB/Cache (z. B. PostgreSQL/Redis)",
+    "Speichert Favoriten, User-Profile/Settings, ggf. Caches für Fahr-/Abfahrtszeiten")
+
+  Container(worker, "Worker/Scheduler", "Job-Runner (z. B. cron/queue)",
+    "Periodische Jobs: Live-Updates prüfen, Verspätungen erkennen, Push-Events auslösen")
+
+  Container(pushSvc, "Push-Service (Adapter)", "interner Adapter",
+    "Kapselt Kommunikation zum externen Push-Provider; Queue/Retry/Rate-Limits")
+}
+
+' ---- Beziehungen: Nutzer ↔ App ↔ Backend
+Rel(student, app, "nutzt über Browser/Smartphone")
+Rel(app, api, "REST/JSON + optional WebSocket", "HTTPS/WSS")
+Rel(api, store, "CRUD / Caching", "SQL/Key-Value")
+Rel(api, vvs, "holt Fahrplan- und Echtzeitdaten", "HTTPS")
+Rel(api, maps, "Karten-/Routing-Requests (optional Proxy)", "HTTPS")
+Rel(api, rapla, "importiert Stundenplan", "HTTPS")
+Rel(api, auth, "Login/OAuth (optional)", "OIDC/OAuth2")
+
+' ---- Push-Fluss
+Rel(worker, vvs,  "pollt/abonniert Echtzeitdaten", "HTTPS")
+Rel(worker, store, "liest Favoriten/Subscriptions", "SQL/Key-Value")
+Rel(worker, pushSvc, "sendet Benachrichtigungs-Events")
+Rel(pushSvc, pushP, "liefert Push an Provider", "HTTPS")
+Rel_D(pushP, student, "stellt Push-Benachrichtigungen zu")
+
+' ---- Rückflüsse/Antworten
+Rel_D(api, app, "liefert Suchergebnisse, Abfahrtszeiten, Karten-Infos, Fehlerhinweise")
+
+SHOW_LEGEND()
+@enduml
