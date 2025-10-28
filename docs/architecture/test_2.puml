@@ -1,0 +1,29 @@
+@startuml
+title Aktivitätsdiagramm – ÖPNV-Verbindung suchen
+
+start
+
+:App öffnen;
+:Zum Suchbereich navigieren;
+:Start- und Zielhaltestelle eingeben;
+
+if (Eingaben vollständig und gültig?) then (Ja)
+    :System sucht verfügbare Verbindungen;
+    :Live-Abfahrtszeiten abrufen;
+    :Verbindungen anzeigen;
+
+    if (Nutzer wählt eine Verbindung aus?) then (Ja)
+        :Verbindungsdetails anzeigen;
+        stop
+    else (Nein)
+        :Nutzer bricht Suche ab;
+        end
+    endif
+
+else (Nein)
+    :Fehlermeldung anzeigen;
+    end
+endif
+
+@enduml
+

@@ -1,0 +1,69 @@
+@startuml C4_Component_CaMo_API
+' C4-PlantUML Component diagram include (remote)
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+' optional: set skinparams oder Theme
+
+' Titel
+LAYOUT_WITH_LEGEND()
+' (Falls deine Umgebung LAYOUT_WITH_LEGEND nicht kennt, ersetze durch LAYOUT_LEFT_RIGHT())
+
+' ---- Externe Container/Systeme, die mit der API-Komponentenschicht sprechen
+Container(web,  "Web App", "React / PWA", "Browser-UI")
+System_Ext(mail, "E-Mail-System", "SMTP-Server", "Versendet Benachrichtigungen & Passwort-Resets.")
+System_Ext(vvs,  "VVS-API", "GTFS/GTFS-RT", "ÖPNV-Fahrplan + Live-Daten")
+
+' ---- Backend API – Komponentenschicht
+Container_Boundary(api, "Backend API (Spring Boot)") {
+
+  ' Controller (Eingang)
+  Component(searchCtl, "SearchController", "REST Controller",
+            "Endpunkte für Verbindungs-/Abfahrts-Suche")
+  Component(favCtl,    "FavoritesController", "REST Controller",
+            "Endpunkte zum Anlegen/Löschen/Listen von Favoriten")
+
+
+
+  ' Services (Domänenlogik)
+  Component(journeySvc,   "JourneySearchService", "Service",
+            "Orchestriert Anfragen an VVS, bereitet Ergebnisse auf")
+  Component(favSvc,       "FavoritesService", "Service",
+            "Verwaltet Favoriten der Nutzer*innen")
+  Component(emailSvc,     "EmailService", "Service",
+            "Versendet E-Mails (SMTP) – z. B. Bestätigungen")
+  Component(eventPub,     "DomainEventPublisher", "Domain Event Bus",
+            "Publisht unveränderliche Domain Events")
+
+  ' Persistenz & Events
+  ComponentDb(db,     "PostgreSQL", "Datenbank",
+              "Nutzer, Favoriten, Logs, Snapshots")
+  ComponentQueue(evq, "Domain Events", "Topic/Queue",
+              "Interne Ereignisse (immutable):\n- ConnectionSearched\n- DepartureTimesUpdated\n- FavoriteAdded/FavoriteRemoved\n- PushNotificationRequested")
+}
+
+' ---- Flüsse UI → Controller
+Rel(web, searchCtl, "ruft", "HTTPS/JSON")
+Rel(web, favCtl,    "ruft", "HTTPS/JSON")
+
+
+
+' ---- Controller → Services
+Rel(searchCtl, journeySvc, "delegiert an")
+Rel(favCtl,    favSvc,     "delegiert an")
+
+' ---- Services ↔ Externe Systeme
+Rel(journeySvc, vvs, "holt Fahrplan + Echtzeit", "HTTPS")
+Rel(emailSvc,   mail,"sendet E-Mails", "SMTP")
+
+' ---- Persistenz
+Rel(journeySvc, db, "liest/schreibt", "SQL/JDBC")
+Rel(favSvc,     db, "liest/schreibt", "SQL/JDBC")
+
+' ---- Domain Events (Publish/Consume)
+Rel(journeySvc, evq, "publisht", "ConnectionSearched, DepartureTimesUpdated")
+Rel(favSvc,     evq, "publisht", "FavoriteAdded, FavoriteRemoved")
+Rel(evq,        emailSvc, "triggert", "PushNotificationRequested → E-Mail")
+
+' Ausgabe: Komponenten-Diagramm
+SHOW_LEGEND()
+@enduml

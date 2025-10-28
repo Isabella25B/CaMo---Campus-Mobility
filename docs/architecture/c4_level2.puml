@@ -1,0 +1,40 @@
+@startuml C4_Container_CaMo
+' C4-PlantUML Container diagram include (remote)
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+' optional: Skin/Theme anpassen
+
+' Titel
+LAYOUT_WITH_LEGEND()
+' (Falls deine Umgebung LAYOUT_WITH_LEGEND nicht kennt, ersetze durch LAYOUT_LEFT_RIGHT())
+
+' ---- Actor 
+Person(student, "Student*in", "nutzt CaMo, um ÖPNV-Verbindungen zu suchen, Favoriten zu speichern und Benachrichtigungen zu erhalten.")
+
+' ---- System unter Design (Boundary) + Container
+System_Boundary(camo, "CaMo - Campus Mobility") {
+  
+  'Client
+  Container(web, "Web App", "React / PWA", "Stellt die Benutzeroberfläche bereit und kommuniziert über HTTPS mit dem Backend.") 
+ 
+  'Backend
+  Container(api, "Backend API", "Java / Spring Boot", "Verarbeitet Suchanfragen, verwaltet Favoriten und sendet E-Mails über das interne E-Mail-System.") 
+  ContainerDb(db, "Datenbank", "PostgreSQL", "Speichert Nutzerkonten, Favoriten, Verbindungsdaten und Logs.")
+}
+
+' ---- Externe Systeme
+System_Ext(mail, "E-Mail-System", "SMTP-Server", "Versendet Benachrichtigungen und Passwort-Resets.")
+
+' ---- Beziehungen 
+Rel(student, web, "nutzt", "HTTPS") 
+Rel(web, api, "ruft REST-Endpunkte auf", "HTTPS / JSON") 
+Rel(api, db, "liest / schreibt", "JDBC / SQL") 
+Rel(api, mail, "sendet E-Mails über", "SMTP")
+Rel_D(api, web, "liefert Suchergebnisse und Bestätigungen")
+
+
+
+' Ausgabe: Containerdiagramm
+SHOW_LEGEND()
+@enduml
+

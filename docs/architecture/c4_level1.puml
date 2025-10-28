@@ -1,0 +1,36 @@
+@startuml C4_Context_Example
+' C4-PlantUML Context diagram include (remote)
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+' optional: set skinparams oder Theme (siehe Repo für Varianten)
+
+' Titel
+LAYOUT_WITH_LEGEND()
+
+' Definiere System und Actor
+Person(person, "Student*in", "studiert an der DHBW Technik")
+System(camo, "CaMo - Campus Mobility", "Sorgt für eine effiziente und stressfreie An- und Abfahrt zur DHBW Technik.")
+
+' Externe Systeme
+System_Ext(vvs,  "VVS-API", "ÖPNV-Fahrplandaten + Live-Updates")
+System_Ext(maps, "Google/OSM", "Karte mit Haltestellen in der Umgebung")
+System_Ext(push, "Push-Dienst", "für Benachrichtigungen.")
+System_Ext(plan, "Rapla", "Vorlesungsplan der Studierenden.")
+System_Ext(marcel, "...", "Externe Dienste (Login, ...)")
+
+' Beziehungen
+Rel(person, camo, "sucht & favorisiert Verbindungen; öffnet Karte; verlinkt Stundenplan")
+Rel(camo, vvs,  "ruft Fahrplan + Echtzeitdaten ab")
+Rel(camo, maps, "Weg zum Halt anzeigen")
+Rel(camo, push, "versendet Verspätungs-/Störungs-Push")
+Rel(camo, plan, "liest Stundenplan, berechnet Ankunftszeiten")
+Rel(camo, marcel, "nutzt")
+
+' Rückflüsse
+Rel_D(camo, person, "zeigt Ergebnisse, Karte, Abfahrtszeiten, Fehlerhinweise an")
+Rel_D(push, person, "sendet Push-Benachrichtigungen")
+
+
+' Ausgabe: Kontextdiagramm
+SHOW_LEGEND()
+@enduml
