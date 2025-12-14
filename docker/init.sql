@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS trips (
     ON UPDATE CASCADE
 );
 
+---------
 -- =========================
 -- 3) Users: NUR E-Mail + Token
 -- =========================
