@@ -1,50 +1,51 @@
-// >>> HIER die Base-URL von eurem Professor/Backend eintragen <<<
-const API_BASE = "http://localhost:8000"; // Beispiel!
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-const form = document.getElementById("login-form");
-const emailEl = document.getElementById("email");
-const pwEl = document.getElementById("password");
-const errEl = document.getElementById("login-error");
-const btnEl = document.getElementById("login-btn");
+    const usernameInput = document.getElementById('username').value;
+    const passwordInput = document.getElementById('password').value;
+    const errorMsg = document.getElementById('login-error');
+    const loginBtn = document.getElementById('login-btn');
 
-function showError(msg) {
-  errEl.textContent = msg;
-  errEl.style.display = "block";
-}
+    // UI-Feedback
+    loginBtn.disabled = true;
+    loginBtn.innerText = "Wird angemeldet...";
+    errorMsg.style.display = 'none';
 
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  errEl.style.display = "none";
-  btnEl.disabled = true;
+    // Das JSON-Objekt laut deiner Doku
+    const payload = {
+        username: usernameInput,
+        password: passwordInput
+    };
 
-  try {
-    const res = await fetch(`${API_BASE}/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      // Swagger Screenshot: body hat username + password
-      body: JSON.stringify({
-        username: emailEl.value.trim(),
-        password: pwEl.value,
-      }),
-    });
+    try {
+        const response = await fetch('https://vsv-research.volkmann-webservices.de/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json', // Wir senden JSON
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(payload) // Umwandlung des Objekts in einen String
+        });
 
-    if (!res.ok) {
-      // oft kommt bei FastAPI 422 wenn body falsch ist
-      const text = await res.text();
-      throw new Error(`Login fehlgeschlagen (${res.status}). ${text}`);
+        const data = await response.json();
+
+        if (response.ok) {
+            // Erfolg: Token speichern
+            // data.access_token ist der Standardname, schau ggf. in die Response-Doku
+            sessionStorage.setItem('camo_token', data.access_token);
+            sessionStorage.setItem('camo_username', usernameInput);
+
+            window.location.href = 'index.html';
+        } else {
+            // Fehlerbehandlung
+            errorMsg.innerText = data.detail || "Anmeldung fehlgeschlagen.";
+            errorMsg.style.display = 'block';
+        }
+    } catch (error) {
+        errorMsg.innerText = "Verbindung zum Auth-Server fehlgeschlagen.";
+        errorMsg.style.display = 'block';
+    } finally {
+        loginBtn.disabled = false;
+        loginBtn.innerText = "Anmelden";
     }
-
-    // Swagger zeigt "string" als Response -> also Token als Text
-    const token = await res.text();
-
-    // speichern (nur für Session/Tab)
-    sessionStorage.setItem("camo_token", token);
-
-    // optional: zurück auf Startseite
-    window.location.href = "index.html";
-  } catch (err) {
-    showError(err.message || "Login fehlgeschlagen.");
-  } finally {
-    btnEl.disabled = false;
-  }
 });

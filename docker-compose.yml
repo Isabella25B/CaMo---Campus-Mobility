@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # --- Datenbank ---
   mariadb:
     image: mariadb:11.4
     container_name: camo_database
@@ -17,9 +18,45 @@ services:
     networks:
       - camo_network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      timeout: 20s
-      retries: 10
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-prootpassword123"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # --- Backend ---
+  vvs-backend:
+    build: ./backend
+    container_name: vvs_backend
+    ports:
+      - "5000:5000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      # Hier kannst du die DB-Verbindung für Python definieren:
+      - DB_HOST=mariadb
+      - DB_NAME=camo_db
+      - DB_USER=camo_user
+      - DB_PASS=camo_password123
+    volumes:
+      - ./backend:/app
+    networks:
+      - camo_network
+    depends_on:
+      mariadb:
+        condition: service_healthy
+
+  # --- Frontend ---
+  vvs-frontend:
+    image: nginx:alpine
+    container_name: vvs_frontend
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+    ports:
+      - "8080:80"
+    networks:
+      - camo_network
+    depends_on:
+      - vvs-backend
 
 volumes:
   mariadb_data:

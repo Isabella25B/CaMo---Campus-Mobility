@@ -1,0 +1,8 @@
+FROM python:3.10-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+# WICHTIG: haltestellen.csv muss im gleichen Ordner liegen!
+EXPOSE 5000
+CMD ["python", "vvs_app.py"]

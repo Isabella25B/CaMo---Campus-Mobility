@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Campus VVS Navigator</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; padding: 20px; max-width: 750px; margin: auto; background-color: #f4f7f6; }
+        .card { background: white; border: 1px solid #ddd; padding: 20px; margin-bottom: 15px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .search-container { position: relative; width: 100%; margin: 5px 0 15px 0; }
+        .suggest-box { 
+            position: absolute; top: 100%; left: 0; right: 0; background: white; 
+            border: 1px solid #ccc; border-radius: 0 0 8px 8px; z-index: 1000; 
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1); display: none; max-height: 250px; overflow-y: auto; 
+        }
+        .suggest-item { padding: 12px; cursor: pointer; border-bottom: 1px solid #eee; font-size: 0.95em; }
+        .suggest-item:hover { background-color: #eef2ff; color: #005aa3; }
+        .leg { border-left: 4px solid #005aa3; padding-left: 15px; margin: 15px 0; }
+        .mode-select { margin-bottom: 20px; display: flex; gap: 20px; background: #fff; padding: 15px; border-radius: 10px; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        label { font-weight: bold; margin-top: 10px; display: block; color: #555; }
+        input, select { padding: 12px; margin: 8px 0; width: 100%; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; font-size: 1em; }
+        button { background: #005aa3; color: white; border: none; padding: 14px; border-radius: 6px; cursor: pointer; width: 100%; font-size: 1.1em; font-weight: bold; transition: 0.2s; }
+        button:hover { background: #003d6e; }
+        .arrow { color: #888; font-size: 0.9em; margin-left: 20px; display: block; }
+        hr { border: 0; border-top: 1px solid #eee; margin: 15px 0; }
+    </style>
+</head>
+<body>
+    <h2 style="text-align:center; color:#005aa3;">🎓 Campus VVS Navigator</h2>
+    
+    <div class="mode-select">
+        <label style="cursor:pointer"><input type="radio" name="mode" value="to_uni" checked onchange="toggleBuffer(true)"> 🏛 Anfahrt Uni</label>
+        <label style="cursor:pointer"><input type="radio" name="mode" value="to_home" onchange="toggleBuffer(false)"> 🏠 Rückfahrt Heim</label>
+    </div>
+
+    <div class="card">
+        <label id="stopLabel">Heimathaltestelle:</label>
+        <div class="search-container">
+            <input type="text" id="userStop" placeholder="Name oder Ort tippen..." autocomplete="off">
+            <input type="hidden" id="userStopId">
+            <div id="suggestBox" class="suggest-box"></div>
+        </div>
+
+        <div style="display: flex; gap: 15px;">
+            <div style="flex: 1;"><label>Datum:</label><input type="date" id="date"></div>
+            <div style="flex: 1;"><label>Uhrzeit:</label><input type="time" id="time"></div>
+        </div>
+
+        <div id="bufferContainer">
+            <label>Puffer (früher ankommen):</label>
+            <select id="buffer">
+                <option value="0">Kein Puffer</option>
+                <option value="10">10 Min</option>
+                <option value="20" selected>20 Min</option>
+                <option value="30">30 Min</option>
+            </select>
+        </div>
+        <button onclick="getConnections()">🔍 Verbindungen finden</button>
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+        // Defaults
+        document.getElementById('date').value = new Date().toISOString().split('T')[0];
+        document.getElementById('time').value = new Date().toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit'});
+
+        let allStops = [];
+
+        function toggleBuffer(show) {
+            document.getElementById('bufferContainer').style.display = show ? 'block' : 'none';
+            document.getElementById('stopLabel').innerText = show ? 'Heimathaltestelle:' : 'Zielhaltestelle:';
+        }
+
+        async function loadStops() {
+            try {
+                const res = await fetch('http://localhost:5000/api/stops');
+                allStops = await res.json();
+            } catch (e) { console.error("Konnte Haltestellen nicht laden."); }
+        }
+        loadStops();
+
+        const input = document.getElementById('userStop'), idField = document.getElementById('userStopId'), box = document.getElementById('suggestBox');
+
+        input.addEventListener('input', () => {
+            const val = input.value.toLowerCase().trim();
+            box.innerHTML = ''; idField.value = '';
+            if (val.length < 2) { box.style.display = 'none'; return; }
+
+            const matches = allStops.filter(s => s.name.toLowerCase().includes(val)).slice(0, 10);
+            if (matches.length > 0) {
+                matches.forEach(m => {
+                    const d = document.createElement('div'); d.className = 'suggest-item'; d.textContent = m.name;
+                    d.onclick = () => { input.value = m.name; idField.value = m.id; box.style.display = 'none'; };
+                    box.appendChild(d);
+                });
+                box.style.display = 'block';
+            } else { box.style.display = 'none'; }
+        });
+
+        document.addEventListener('click', (e) => { if(e.target !== input) box.style.display = 'none'; });
+
+        async function getConnections() {
+            if (!idField.value) return alert("Bitte eine Haltestelle aus den Vorschlägen wählen!");
+            const resDiv = document.getElementById('results');
+            resDiv.innerHTML = "<p style='text-align:center'>⌛ Suche läuft...</p>";
+            
+            const mode = document.querySelector('input[name="mode"]:checked').value;
+            const date = document.getElementById('date').value.replace(/-/g, '');
+            const time = document.getElementById('time').value.replace(':', '');
+            const buffer = document.getElementById('buffer').value;
+
+            try {
+                const res = await fetch(`http://localhost:5000/api/connections?mode=${mode}&userStopId=${encodeURIComponent(idField.value)}&date=${date}&time=${time}&buffer=${buffer}`);
+                const data = await res.json();
+                resDiv.innerHTML = "";
+                data.journeys.forEach(j => {
+                    let legs = j.sections.map(s => `
+                        <div class="leg">
+                            <strong>${s.line}</strong>: ${s.from} (${s.departure}) <br>
+                            <span class="arrow">↳ an ${s.to} (${s.arrival})</span>
+                        </div>
+                    `).join("");
+                    resDiv.innerHTML += `
+                        <div class="card">
+                            <div style="display:flex; justify-content:space-between; font-weight:bold; color:#005aa3; font-size:1.1em;">
+                                <span>${j.dep} - ${j.arr}</span>
+                                <span>${j.duration} Min.</span>
+                            </div>
+                            <div style="font-size:0.85em; color:#666; margin-top:5px;">Umstiege: ${j.interchanges}</div>
+                            <hr>
+                            ${legs}
+                        </div>`;
+                });
+            } catch (e) { resDiv.innerHTML = "Fehler bei der Suche."; }
+        }
+    </script>
+</body>
+</html>

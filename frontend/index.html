@@ -11,7 +11,7 @@
     <div class="sidebar">
       <!-- Logo-Bereich -->
       <div class="sidebar-header">
-        <img src="../Logo.png" alt="CaMo Logo" class="sidebar-logo" />
+        <img src="Logo.png" alt="CaMo Logo" class="sidebar-logo" />
         <div class="sidebar-appname"></div>
       </div>
 
@@ -31,7 +31,7 @@
           <div class="topbar-left"></div>
           <div class="topbar-right">
             <button class="icon-button" aria-label="Einstellungen">⚙️</button>
-            <a class="sign-in-button" href="login.html">Sign in</a>
+            <a id="auth-button" class="sign-in-button" href="login.html">Sign in</a>
           </div>
         </div>
 
@@ -72,10 +72,36 @@
       </div>
     </div>
 
-    <!-- optional: Login-Check -->
     <script>
-      const token = sessionStorage.getItem("camo_token");
-      // if (!token) window.location.href = "login.html";
+      document.addEventListener("DOMContentLoaded", () => {
+        // Daten aus dem Speicher holen
+        const token = sessionStorage.getItem("camo_token");
+        const username = sessionStorage.getItem("camo_username");
+        const authButton = document.getElementById("auth-button");
+        const titleElement = document.querySelector(".headline-title");
+
+        // Wenn ein Token existiert (User ist eingeloggt)
+        if (token) {
+            // Titel anpassen
+            if (username) {
+                titleElement.innerText = `Willkommen zurück, ${username}!`;
+            }
+
+            // Button zu Logout umbauen
+            if (authButton) {
+                authButton.innerText = "Logout";
+                authButton.href = "#";
+                authButton.style.backgroundColor = "#d9534f"; // Rot für Logout
+                
+                authButton.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    sessionStorage.removeItem("camo_token");
+                    sessionStorage.removeItem("camo_username");
+                    window.location.reload(); // Seite neu laden
+                });
+              }
+          }
+      });
     </script>
   </body>
 </html>
