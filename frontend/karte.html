@@ -4,15 +4,8 @@
     <meta charset="UTF-8" />
     <title>CaMo – Interaktive Karte</title>
     <link rel="stylesheet" href="styles.css" />
-
-    <!-- Leaflet CSS -->
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-      crossorigin=""
-    />
   </head>
+
   <body>
     <!-- Sidebar links -->
     <div class="sidebar">
@@ -35,10 +28,7 @@
       <div class="page-shell">
         <!-- graue Leiste oben -->
         <div class="topbar">
-          <div class="topbar-left">
-            <span class="breadcrumbs">Pages / Charts</span>
-            <span class="page-name">Charts</span>
-          </div>
+          <div class="topbar-left"></div>
           <div class="topbar-right">
             <button class="icon-button" aria-label="Einstellungen">⚙️</button>
             <button class="sign-in-button">Sign in</button>
@@ -47,31 +37,22 @@
 
         <!-- roter Balken mit Titel -->
         <div class="headline-bar">
-          <h1 class="headline-title">Abfahrtszeiten – Haltestellen</h1>
+          <h1 class="headline-title">Haltestellen in deiner Umgebung</h1>
         </div>
 
-        <!-- Inhalt: links Abfahrts-Tabelle, rechts Karte -->
-        <div class="page-content">
-          <div class="card departures-card">
-            <h2>Live-Abfahrtszeiten</h2>
-            <p>Hier werden später die Live-ÖPNV-Daten angezeigt.</p>
-          </div>
-
-          <div class="map-wrapper">
-            <div id="map"></div>
+        <div class="page-content page-content--single">
+          <div class="map-wrapper full-map">
+            <iframe
+              id="map-embed"
+              title="Google Map mit ÖPNV"
+              loading="lazy"
+              allowfullscreen
+              referrerpolicy="no-referrer-when-downgrade"
+              src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d2135.390961865467!2d9.16688785346601!3d48.782379960906674!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sde!2sde!4v1765965882393!5m2!1sde!2sde"
+            ></iframe>
           </div>
         </div>
       </div>
     </div>
-
-    <!-- Leaflet JS -->
-    <script
-      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-      crossorigin=""
-    ></script>
-
-    <!-- Dein bisheriges JS für die Karte -->
-    <script src="map.js"></script>
   </body>
 </html>
