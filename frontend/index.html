@@ -5,6 +5,7 @@
     <title>CaMo – Start</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
+
   <body>
     <!-- Sidebar links -->
     <div class="sidebar">
@@ -30,7 +31,7 @@
           <div class="topbar-left"></div>
           <div class="topbar-right">
             <button class="icon-button" aria-label="Einstellungen">⚙️</button>
-            <button class="sign-in-button">Sign in</button>
+            <a class="sign-in-button" href="login.html">Sign in</a>
           </div>
         </div>
 
@@ -39,19 +40,42 @@
           <h1 class="headline-title">Willkommen bei CaMo</h1>
         </div>
 
-        <!-- einspaltiger Seiteninhalt -->
+        <!-- Seiteninhalt -->
         <div class="page-content page-content--single">
+          <!-- Übersicht -->
           <div class="card">
             <h2>Übersicht</h2>
-            <p>Dies ist die Startseite der Campus-Mobility-Webapp.</p>
+            <p>Dies ist die Startseite von Campus-Mobility.</p>
             <p>
               Über die Seitenleiste links kannst du die verschiedenen Bereiche
               wie Verbindungen, Favoriten, Stundenplan und die interaktive Karte
               auswählen.
             </p>
           </div>
+
+          <!-- Live Abfahrten -->
+          <div class="departures-wrap">
+            <div class="card departures-card">
+              <h2>Live Abfahrten (VVS)</h2>
+
+              <iframe
+                class="vvs-departures"
+                title="VVS Abfahrtstafel"
+                loading="lazy"
+                src="https://dfisite.vvs.de/?default_stop=de%3A08111%3A6072&time_offset=3&zoom_factor=0.6&rows=7&show_messages=1&show_position=0&lpm=400&lang=de&pk_campaign=entwicklertools&pk_kwd=abfahrtstafel"
+              ></iframe>
+
+              <small>Quelle: VVS Abfahrtstafel (Echtzeit)</small>
+            </div>
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- optional: Login-Check -->
+    <script>
+      const token = sessionStorage.getItem("camo_token");
+      // if (!token) window.location.href = "login.html";
+    </script>
   </body>
 </html>
