@@ -30,7 +30,6 @@
         <div class="topbar">
           <div class="topbar-left"></div>
           <div class="topbar-right">
-            <button class="icon-button" aria-label="Einstellungen">⚙️</button>
             <a class="sign-in-button" href="login.html">Sign in</a>
           </div>
         </div>
@@ -54,15 +53,30 @@
           </div>
 
           <!-- Live Abfahrten -->
-          <div class="departures-wrap">
+          <div class="departures-grid">
+            <!-- LINKS -->
             <div class="card departures-card">
-              <h2>Live Abfahrten (VVS)</h2>
+              <h2>Live Abfahrten – Rosenberg/ Seidenstraße</h2>
 
               <iframe
                 class="vvs-departures"
-                title="VVS Abfahrtstafel"
+                title="VVS Abfahrtstafel – Haltestelle A"
                 loading="lazy"
-                src="https://dfisite.vvs.de/?default_stop=de%3A08111%3A6072&time_offset=3&zoom_factor=0.6&rows=7&show_messages=1&show_position=0&lpm=400&lang=de&pk_campaign=entwicklertools&pk_kwd=abfahrtstafel"
+                src="https://dfisite.vvs.de/?default_stop=de%3A08111%3A6072&time_offset=3&zoom_factor=0.45&rows=7&show_messages=1&show_position=0&lpm=400&lang=de&pk_campaign=entwicklertools&pk_kwd=abfahrtstafel"
+              ></iframe>
+
+              <small>Quelle: VVS Abfahrtstafel (Echtzeit)</small>
+            </div>
+
+            <!-- RECHTS -->
+            <div class="card departures-card">
+              <h2>Live Abfahrten – Linden Museum</h2>
+
+              <iframe
+                class="vvs-departures"
+                title="VVS Abfahrtstafel – Haltestelle B"
+                loading="lazy"
+                src="https://dfisite.vvs.de/?default_stop=de%3A08111%3A2196&time_offset=3&zoom_factor=0.45&rows=7&show_messages=1&show_position=0&lpm=400&lang=de&pk_campaign=entwicklertools&pk_kwd=abfahrtstafel"
               ></iframe>
 
               <small>Quelle: VVS Abfahrtstafel (Echtzeit)</small>
@@ -72,10 +86,10 @@
       </div>
     </div>
 
-    <!-- optional: Login-Check -->
+    <!--Login-Check -->
     <script>
       const token = sessionStorage.getItem("camo_token");
-      // if (!token) window.location.href = "login.html";
+      // if (!token) window.location.href = "login.html"; (optionale Zugriffspere, falls kein Token vorhanden)
     </script>
   </body>
 </html>
