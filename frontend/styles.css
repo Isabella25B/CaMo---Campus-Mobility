@@ -1,6 +1,4 @@
-/* =========================================================
-   1) Design-Variablen (Farben, Abstände, Radius)
-   ========================================================= */
+/* 1) Design-Variablen (Farben, Abstände, Radius) */
 :root {
   --color-bg-sidebar: #f5f5f5;
   --color-bg-page: #ffffff;
@@ -18,9 +16,8 @@
   --shadow-soft: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
-/* =========================================================
-   2) Grundlayout: Sidebar links, Inhalt rechts
-   ========================================================= */
+/* 2) Grundlayout: Sidebar links, Inhalt rechts*/
+
 body {
   margin: 0;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
@@ -30,9 +27,7 @@ body {
   color: var(--color-text);
 }
 
-/* =========================================================
-   3) Sidebar (gilt für alle Seiten)
-   ========================================================= */
+/* 3) Sidebar (gilt für alle Seiten) */
 .sidebar {
   width: 220px;
   background-color: var(--color-bg-sidebar);
@@ -62,7 +57,6 @@ body {
   font-size: 15px;
 }
 
-/* Hover */
 .sidebar a:hover {
   background-color: #e0e0e0;
 }
@@ -114,9 +108,7 @@ body {
   color: var(--color-muted-soft);
 }
 
-/* =========================================================
-   4) Hauptbereich rechts (gemeinsam für alle Seiten)
-   ========================================================= */
+/* 4) Hauptbereich rechts (gemeinsam für alle Seiten) */
 .content {
   margin-left: 260px;
   padding: 24px;
@@ -134,9 +126,7 @@ body {
   gap: 16px;
 }
 
-/* =========================================================
-   5) Obere Leiste + roter Titel-Balken
-   ========================================================= */
+/* 5) Obere Leiste + roter Titel-Balken*/
 .topbar {
   display: flex;
   justify-content: space-between;
@@ -206,9 +196,7 @@ body {
   font-size: 20px;
 }
 
-/* =========================================================
-   6) Content-Layouts & Karten
-   ========================================================= */
+/* 6) Content-Layouts & Karten*/
 .page-content {
   display: flex;
   gap: 24px;
@@ -234,9 +222,7 @@ body {
   flex: 1;
 }
 
-/* =========================================================
-   7) Google Maps Embed (iframe)
-   ========================================================= */
+/* 7) Google Maps Embed (iframe)*/
 #map-embed {
   width: 100%;
   height: 400px;
@@ -331,24 +317,55 @@ body {
 .login-title {
   color: var(--color-accent);
 }
-/* Wrapper bestimmt die Breite */
-.departures-wrap {
-  max-width: 520px;
+/* ===== Abfahrten: zwei Tafeln nebeneinander ===== */
+
+.departures-grid {
+  display: flex;
+  gap: 24px;
+  align-items: stretch;
 }
 
-/* card soll nicht flex:1 (voll breit) machen */
+/* Beide Tafeln gleich breit */
 .departures-card {
-  flex: none;
-  width: 100%;
+  flex: 1;
+  min-width: 0; /* verhindert, dass iframes das Layout sprengen */
 }
 
-/* iframe passt sich der Card an */
+/* iframe bleibt sauber im Card-Rahmen */
 .vvs-departures {
   width: 100%;
-  height: 360px;
+  height: 340px;
   border: 0;
   border-radius: var(--radius-lg);
   display: block;
+}
+
+/* Optional: Überschrift/Quelle etwas ruhiger */
+.departures-card small {
+  display: inline-block;
+  margin-top: 8px;
+  color: var(--color-muted);
+}
+
+/* Auf kleineren Bildschirmen untereinander */
+@media (max-width: 900px) {
+  .departures-grid {
+    flex-direction: column;
+  }
+}
+
+/* Optional: Überschrift/Quelle etwas ruhiger */
+.departures-card small {
+  display: inline-block;
+  margin-top: 8px;
+  color: var(--color-muted);
+}
+
+/* Auf kleineren Bildschirmen untereinander */
+@media (max-width: 900px) {
+  .departures-grid {
+    flex-direction: column;
+  }
 }
 
 /* Container für Elemente, die nebeneinander stehen sollen */
