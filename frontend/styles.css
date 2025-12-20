@@ -350,3 +350,38 @@ body {
   border-radius: var(--radius-lg);
   display: block;
 }
+
+/* Container für Elemente, die nebeneinander stehen sollen */
+.input-row {
+    display: flex;
+    gap: 16px;
+    width: 100%;
+}
+
+/* Sorgt dafür, dass die Gruppen gleichmäßig wachsen und nicht überlappen */
+.input-row .input-group {
+    flex: 1;
+    min-width: 0; /* Verhindert das "Rausdrücken" aus der Reihe */
+}
+
+/* Standard-Styling für alle Formularfelder */
+input[type="date"],
+input[type="time"],
+input[type="text"],
+select {
+    width: 100%;
+    box-sizing: border-box; /* WICHTIG: Padding wird nicht zur Breite addiert */
+    padding: 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    font-size: 14px;
+    background-color: #fff;
+}
+
+/* Optional: Damit es auf dem Handy untereinander springt */
+@media (max-width: 500px) {
+    .input-row {
+        flex-direction: column;
+        gap: 10px;
+    }
+}

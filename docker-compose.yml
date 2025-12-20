@@ -6,10 +6,10 @@ services:
     image: mariadb:11.4
     container_name: camo_database
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword123
-      MYSQL_DATABASE: camo_db
-      MYSQL_USER: camo_user
-      MYSQL_PASSWORD: camo_password123
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASS}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASS}
     ports:
       - "3306:3306"
     volumes:
@@ -32,11 +32,10 @@ services:
       - "5000:5000"
     environment:
       - PYTHONUNBUFFERED=1
-      # Hier kannst du die DB-Verbindung für Python definieren:
       - DB_HOST=mariadb
-      - DB_NAME=camo_db
-      - DB_USER=camo_user
-      - DB_PASS=camo_password123
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
     volumes:
       - ./backend:/app
     networks:

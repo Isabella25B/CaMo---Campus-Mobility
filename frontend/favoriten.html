@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CaMo – Favoriten</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Spezifische Styles für die Favoriten-Liste */
+        .favorites-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .no-favorites {
+            text-align: center;
+            padding: 50px;
+            color: var(--color-muted-soft);
+        }
+
+        /* Styling der Favoriten-Cards (ähnlich wie Suchergebnisse) */
+        .fav-card {
+            border-left: 5px solid var(--color-accent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .fav-info {
+            flex-grow: 1;
+        }
+
+        .fav-remove {
+            background: none;
+            border: none;
+            color: var(--color-muted-soft);
+            cursor: pointer;
+            font-size: 1.2em;
+            padding: 10px;
+            transition: color 0.2s;
+        }
+
+        .fav-remove:hover {
+            color: var(--color-accent);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <img src="../Logo.png" alt="CaMo Logo" class="sidebar-logo" />
+        </div>
+        <h2>APPS</h2>
+        <a href="index.html">Start</a>
+        <a href="verbindungen.html">Verbindungen</a>
+        <a href="favoriten.html" class="active">Favoriten</a>
+        <a href="stundenplan.html">Stundenplan</a>
+        <a href="karte.html">Interaktive Karte</a>
+    </div>
+
+    <div class="content">
+        <div class="page-shell">
+            <div class="topbar">
+                <div class="topbar-left">
+                    <span class="breadcrumbs">Apps /</span>
+                    <span class="page-name">Favoriten</span>
+                </div>
+                <div class="topbar-right">
+                    <button class="icon-button">⚙️</button>
+                    <button class="sign-in-button">Sign in</button>
+                </div>
+            </div>
+
+            <div class="headline-bar">
+                <h1 class="headline-title">Deine gespeicherten Favoriten</h1>
+            </div>
+
+            <div class="page-content page-content--single">
+                <div id="favoritesList" class="favorites-container">
+                    <div class="loading-state" style="text-align:center; padding: 20px;">
+                        Prüfe Anmeldung...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="auth-check.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (await checkAuth()) loadFavorites();
+        });
+
+        async function loadFavorites() {
+            const token = sessionStorage.getItem('camo_token');
+            const res = await fetch(`http://localhost:5000/api/favorites/connection?token=${token}`);
+            const favs = await res.json();
+            const container = document.getElementById('favoritesList');
+            
+            container.innerHTML = favs.length === 0 ? "<div class='card'>Keine Favoriten.</div>" : "";
+            favs.forEach(f => {
+                const sections = typeof f.sections_json === 'string' ? JSON.parse(f.sections_json) : f.sections_json;
+                container.innerHTML += `
+                    <div class="card" style="margin-top:15px;">
+                        <div class="journey-header">
+                            <span>${f.dep_time} - ${f.arr_time} (${f.duration} Min.)</span>
+                            <button class="fav-remove" onclick="deleteFavorite(${f.id})">🗑️</button>
+                        </div>
+                        <hr>
+                        ${sections.map(s => `<div class="leg"><strong>${s.line}</strong>: ${s.from} (${s.departure})<br><span class="arrow">↳ an ${s.to} (${s.arrival})</span></div>`).join("")}
+                    </div>`;
+            });
+        }
+
+        async function deleteFavorite(id) {
+            if (!confirm("Löschen?")) return;
+            const token = sessionStorage.getItem('camo_token');
+            await fetch(`http://localhost:5000/api/favorites/connection/${id}`, {
+                method: 'DELETE',
+                headers: {'Authorization': token}
+            });
+            loadFavorites();
+        }
+    </script>
+</body>
+</html>
