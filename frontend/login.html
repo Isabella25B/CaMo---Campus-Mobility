@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CaMo – Sign in</title>
+
+    <!-- Gemeinsames CSS -->
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+
+  <body class="login-body">
+    <div class="login-page">
+      <div class="login-card">
+        <h1 class="login-title">Sign in</h1>
+        <p class="login-sub">Bitte mit Benutzername & Passwort anmelden.</p>
+
+        <form id="login-form" class="login-form">
+          <label class="login-label">
+            Benutzername
+            <input
+              id="username"
+              class="login-input"
+              type="text"
+              required
+              placeholder="Guest123"
+            />
+          </label>
+
+          <label class="login-label">
+            Passwort
+            <input
+              id="password"
+              class="login-input"
+              type="password"
+              required
+              placeholder="••••••••"
+            />
+          </label>
+
+          <button id="login-btn" class="login-btn" type="submit">
+            Anmelden
+          </button>
+          <p>Noch keinen Account?</p><a href="registrierung.html">Registrieren</a>
+          <p id="login-error" class="login-error" style="display: none"></p>
+        </form>
+      </div>
+    </div>
+
+    <!-- Login-Logik -->
+    <script src="login.js"></script>
+  </body>
+</html>

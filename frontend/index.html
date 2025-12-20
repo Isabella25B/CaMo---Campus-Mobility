@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <title>CaMo – Start</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+
+  <body>
+    <!-- Sidebar links -->
+    <div class="sidebar">
+      <!-- Logo-Bereich -->
+      <div class="sidebar-header">
+        <img src="Logo.png" alt="CaMo Logo" class="sidebar-logo" />
+        <div class="sidebar-appname"></div>
+      </div>
+
+      <h2>APPS</h2>
+      <a href="index.html" class="active">Start</a>
+      <a href="verbindungen.html">Verbindungen</a>
+      <a href="favoriten.html">Favoriten</a>
+      <a href="stundenplan.html">Stundenplan</a>
+      <a href="karte.html">Interaktive Karte</a>
+    </div>
+
+    <!-- Inhalt rechts -->
+    <div class="content">
+      <div class="page-shell">
+        <!-- obere graue Leiste -->
+        <div class="topbar">
+          <div class="topbar-left"></div>
+          <div class="topbar-right">
+            <button class="icon-button" aria-label="Einstellungen">⚙️</button>
+            <a id="auth-button" class="sign-in-button" href="login.html">Sign in</a>
+          </div>
+        </div>
+
+        <!-- roter Balken mit Titel -->
+        <div class="headline-bar">
+          <h1 class="headline-title">Willkommen bei CaMo</h1>
+        </div>
+
+        <!-- Seiteninhalt -->
+        <div class="page-content page-content--single">
+          <!-- Übersicht -->
+          <div class="card">
+            <h2>Übersicht</h2>
+            <p>Dies ist die Startseite von Campus-Mobility.</p>
+            <p>
+              Über die Seitenleiste links kannst du die verschiedenen Bereiche
+              wie Verbindungen, Favoriten, Stundenplan und die interaktive Karte
+              auswählen.
+            </p>
+          </div>
+
+          <!-- Live Abfahrten -->
+          <div class="departures-grid">
+            <!-- LINKS -->
+            <div class="card departures-card">
+              <h2>Live Abfahrten – Rosenberg/ Seidenstraße</h2>
+
+              <iframe
+                class="vvs-departures"
+                title="VVS Abfahrtstafel – Haltestelle A"
+                loading="lazy"
+                src="https://dfisite.vvs.de/?default_stop=de%3A08111%3A6072&time_offset=3&zoom_factor=0.45&rows=7&show_messages=1&show_position=0&lpm=400&lang=de&pk_campaign=entwicklertools&pk_kwd=abfahrtstafel"
+              ></iframe>
+
+              <small>Quelle: VVS Abfahrtstafel (Echtzeit)</small>
+            </div>
+
+            <!-- RECHTS -->
+            <div class="card departures-card">
+              <h2>Live Abfahrten – Linden Museum</h2>
+
+              <iframe
+                class="vvs-departures"
+                title="VVS Abfahrtstafel – Haltestelle B"
+                loading="lazy"
+                src="https://dfisite.vvs.de/?default_stop=de%3A08111%3A2196&time_offset=3&zoom_factor=0.45&rows=7&show_messages=1&show_position=0&lpm=400&lang=de&pk_campaign=entwicklertools&pk_kwd=abfahrtstafel"
+              ></iframe>
+
+              <small>Quelle: VVS Abfahrtstafel (Echtzeit)</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        // Daten aus dem Speicher holen
+        const token = sessionStorage.getItem("camo_token");
+        const username = sessionStorage.getItem("camo_username");
+        const authButton = document.getElementById("auth-button");
+        const titleElement = document.querySelector(".headline-title");
+
+        // Wenn ein Token existiert (User ist eingeloggt)
+        if (token) {
+            // Titel anpassen
+            if (username) {
+                titleElement.innerText = `Willkommen zurück, ${username}!`;
+            }
+
+            // Button zu Logout umbauen
+            if (authButton) {
+                authButton.innerText = "Logout";
+                authButton.href = "#";
+                authButton.style.backgroundColor = "#d9534f"; // Rot für Logout
+                
+                authButton.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    sessionStorage.removeItem("camo_token");
+                    sessionStorage.removeItem("camo_username");
+                    window.location.reload(); // Seite neu laden
+                });
+              }
+          }
+      });
+    </script>
+  </body>
+</html>

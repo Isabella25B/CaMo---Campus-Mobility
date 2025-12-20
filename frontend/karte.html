@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <title>CaMo – Interaktive Karte</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+
+  <body>
+    <!-- Sidebar links -->
+    <div class="sidebar">
+      <!-- Logo-Bereich -->
+      <div class="sidebar-header">
+        <img src="../Logo.png" alt="CaMo Logo" class="sidebar-logo" />
+        <div class="sidebar-appname"></div>
+      </div>
+
+      <h2>APPS</h2>
+      <a href="index.html">Start</a>
+      <a href="verbindungen.html">Verbindungen</a>
+      <a href="favoriten.html">Favoriten</a>
+      <a href="stundenplan.html">Stundenplan</a>
+      <a href="karte.html" class="active">Interaktive Karte</a>
+    </div>
+
+    <!-- Inhalt rechts -->
+    <div class="content">
+      <div class="page-shell">
+        <!-- graue Leiste oben -->
+        <div class="topbar">
+          <div class="topbar-left"></div>
+          <div class="topbar-right">
+            <button class="icon-button" aria-label="Einstellungen">⚙️</button>
+            <button class="sign-in-button">Sign in</button>
+          </div>
+        </div>
+
+        <!-- roter Balken mit Titel -->
+        <div class="headline-bar">
+          <h1 class="headline-title">Haltestellen in deiner Umgebung</h1>
+        </div>
+
+        <div class="page-content page-content--single">
+          <div class="map-wrapper full-map">
+            <iframe
+              id="map-embed"
+              title="Google Map mit ÖPNV"
+              loading="lazy"
+              allowfullscreen
+              referrerpolicy="no-referrer-when-downgrade"
+              src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d2135.390961865467!2d9.16688785346601!3d48.782379960906674!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sde!2sde!4v1765965882393!5m2!1sde!2sde"
+            ></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
