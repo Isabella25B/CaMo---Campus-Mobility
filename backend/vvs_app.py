@@ -5,26 +5,28 @@ from flask_cors import CORS
 from datetime import datetime, timedelta
 import base64
 import json
-import mysql.connector
 from dotenv import load_dotenv
 import os
+import psycopg2
+from psycopg2.extras import RealDictCursor  # WICHTIG für PostgreSQL Dict-Support
 
 app = Flask(__name__)
 CORS(app)
 
 load_dotenv()
 
-# --- DATENBANK KONFIGURATION ---
+# --- DATENBANK KONFIGURATION (PostgreSQL spezifisch) ---
 db_config = {
-    'host': os.getenv('DB_HOST', 'mariadb'),
-    'user': os.getenv('DB_USER', 'camo_user'),
-    'password': os.getenv('DB_PASS', 'camo_password123'),
-    'database': os.getenv('DB_NAME', 'camo_db'),
-    'port': 3306
+    'host': os.getenv('DB_HOST'),
+    'user': os.getenv('DB_USER'),
+    'password': os.getenv('DB_PASS'),
+    'dbname': os.getenv('DB_NAME'),  # psycopg2 nutzt 'dbname' statt 'database'
+    'port': os.getenv('DB_PORT', '5432')
 }
 
 def get_db_connection():
-    return mysql.connector.connect(**db_config)
+    # Verbindung zu PostgreSQL aufbauen
+    return psycopg2.connect(**db_config)
 
 # --- VVS KONFIGURATION ---
 BASE_URL = "https://www3.vvs.de/mngvvs/XML_TRIP_REQUEST2"
@@ -33,7 +35,6 @@ UNI_STOPS = [
     {"name": "Linden-Museum", "id": "de:08111:2196"}
 ]
 
-# VOLLSTÄNDIGE PARAMETER (Wichtig für die EFA-Schnittstelle)
 STATIC_EFA_PARAMS = {
     "SpEncId": 0, 
     "changeSpeed": "normal", 
@@ -69,7 +70,9 @@ stop_mapping = {}
 
 def load_stops():
     try:
-        with open('haltestellen.csv', mode='r', encoding='utf-8-sig') as f:
+        # Pfad eventuell für Docker anpassen, falls die Datei im 'backend' Ordner liegt
+        file_path = os.path.join(os.path.dirname(__file__), 'haltestellen.csv')
+        with open(file_path, mode='r', encoding='utf-8-sig') as f:
             reader = csv.DictReader(f, delimiter=';')
             for row in reader:
                 name, stop_id = row['Name'].strip(), row['Globale ID'].strip()
@@ -93,21 +96,15 @@ def get_username_from_token(token):
     except: return None
 
 def format_vvs_time(time_str):
-    """Extrahiert zuverlässig HH:MM aus VVS-Zeitformaten (ISO oder raw)."""
     if not time_str or not isinstance(time_str, str):
         return "--:--"
-    
-    # Fall 1: ISO-Format (z.B. 2025-12-20T17:16:00Z)
     if 'T' in time_str:
         try:
             return time_str.split('T')[1][:5]
         except IndexError:
             return "--:--"
-    
-    # Fall 2: Reines Zahlenformat (z.B. 1716)
     if len(time_str) == 4 and time_str.isdigit():
         return f"{time_str[:2]}:{time_str[2:]}"
-        
     return time_str[:5]
 
 def parse_vvs_data(vvs_json):
@@ -123,10 +120,8 @@ def parse_vvs_data(vvs_json):
         for leg in legs:
             origin = leg.get('origin', {})
             destination = leg.get('destination', {})
-
             dep_raw = (leg.get('departureTimeEstimated') or leg.get('departureTimePlanned') or 
                        origin.get('departureTimeEstimated') or origin.get('departureTimePlanned'))
-            
             arr_raw = (leg.get('arrivalTimeEstimated') or leg.get('arrivalTimePlanned') or 
                        destination.get('arrivalTimeEstimated') or destination.get('arrivalTimePlanned'))
 
@@ -138,32 +133,18 @@ def parse_vvs_data(vvs_json):
                 "arrival": format_vvs_time(arr_raw)
             })
 
-        # --- DAUER-BERECHNUNG (REALE ZEITSPANNE) ---
-        # Wir nehmen die exakten Strings, die wir oben für die Anzeige genutzt haben
-        first_dep = sections[0]['departure']  # Format "HH:MM"
-        last_arr = sections[-1]['arrival']    # Format "HH:MM"
-        
+        first_dep = sections[0]['departure']
+        last_arr = sections[-1]['arrival']
         duration_minutes = 0
-        
         try:
-            # Wir berechnen die Dauer direkt aus den formatierten HH:MM Zeiten
-            # Das ist am sichersten, da diese Strings bereits validiert sind
             t1 = datetime.strptime(first_dep, "%H:%M")
             t2 = datetime.strptime(last_arr, "%H:%M")
-            
-            # Differenz berechnen
             delta = t2 - t1
             seconds = delta.total_seconds()
-            
-            # Falls die Fahrt über Mitternacht geht (negatives Ergebnis)
             if seconds < 0:
-                seconds += 86400 # 24 Stunden dazu addieren
-                
+                seconds += 86400 
             duration_minutes = int(seconds / 60)
-            
-        except Exception as e:
-            # Letzter Fallback: Das duration-Feld der API (Sekunden -> Minuten)
-            print(f"Fehler bei Dauer-Berechnung: {e}")
+        except Exception:
             duration_minutes = journey.get('duration', 0) // 60
 
         processed.append({
@@ -186,19 +167,15 @@ def get_connections():
     mode = request.args.get('mode')
     user_stop_id = request.args.get('userStopId')
     t_date = request.args.get('date') 
-    t_time = request.args.get('time')  # Format: "HHMM"
+    t_time = request.args.get('time')
     
-    # 1. Puffer aus den Argumenten extrahieren
     try:
-        # Wir addieren pauschal 10 Min (Wegzeit) zum User-Puffer
         user_buffer = int(request.args.get('buffer', 0))
         total_buffer_minutes = user_buffer + 10 
     except (ValueError, TypeError):
         total_buffer_minutes = 10
 
     results = []
-    
-    # 2. Zeitberechnung vorbereiten
     try:
         base_time = datetime.strptime(t_time, "%H%M")
     except ValueError:
@@ -206,23 +183,19 @@ def get_connections():
 
     for uni in UNI_STOPS:
         if mode == 'to_uni':
-            # HINWEG: Ankunft an der Uni soll sein: Vorlesungsbeginn MINUS Puffer
             search_dt = base_time - timedelta(minutes=total_buffer_minutes)
             origin, dest, t_type = user_stop_id, uni["id"], "arr"
         else:
-            # RÜCKWEG: Abfahrt an der Uni soll sein: Vorlesungsende PLUS Puffer
             search_dt = base_time + timedelta(minutes=total_buffer_minutes)
             origin, dest, t_type = uni["id"], user_stop_id, "dep"
             
-        # Zeit für VVS-Anfrage formatieren ("HHMM")
         search_time = search_dt.strftime("%H%M")
-            
         params = {
             **STATIC_EFA_PARAMS, 
             "name_origin": origin, 
             "name_destination": dest, 
             "itdDate": t_date, 
-            "itdTime": search_time,  # Hier wird jetzt die berechnete Zeit genutzt!
+            "itdTime": search_time,
             "itdTripDateTimeDepArr": t_type,
             "calcNumberOfTrips": 4
         }
@@ -235,7 +208,6 @@ def get_connections():
             print(f"Fehler VVS: {e}")
             continue
     
-    # Sortierung: Bei Hinfahrt späteste Ankunft zuerst, bei Rückfahrt früheste Abfahrt
     if mode == 'to_uni':
         results.sort(key=lambda x: x['arr'], reverse=True)
     else:
@@ -250,33 +222,29 @@ def manage_profile():
     if not username: return jsonify({"error": "Unauthorized"}), 401
     
     db = get_db_connection()
-    cursor = db.cursor(dictionary=True)
+    # RealDictCursor sorgt dafür, dass die Ergebnisse als Dictionary geliefert werden
+    cursor = db.cursor(cursor_factory=RealDictCursor)
     try:
         if request.method == 'GET':
             cursor.execute("SELECT * FROM user_profiles WHERE username = %s", (username,))
-            return jsonify(cursor.fetchone() or {})
+            res = cursor.fetchone()
+            return jsonify(dict(res) if res else {})
         else:
             d = request.json
+            # PostgreSQL "Upsert" Syntax: ON CONFLICT ... DO UPDATE
             sql = """INSERT INTO user_profiles (username, timetable_link, home_stop_id, home_stop_name, buffer_time) 
-                     VALUES (%s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE 
-                     timetable_link=VALUES(timetable_link), home_stop_id=VALUES(home_stop_id), 
-                     home_stop_name=VALUES(home_stop_name), buffer_time=VALUES(buffer_time)"""
+                     VALUES (%s, %s, %s, %s, %s) 
+                     ON CONFLICT (username) DO UPDATE SET 
+                     timetable_link=EXCLUDED.timetable_link, 
+                     home_stop_id=EXCLUDED.home_stop_id, 
+                     home_stop_name=EXCLUDED.home_stop_name, 
+                     buffer_time=EXCLUDED.buffer_time"""
             cursor.execute(sql, (username, d.get('course'), d.get('stop_id'), d.get('stop_name'), d.get('buffer')))
             db.commit()
             return jsonify({"status": "success"})
     finally:
         cursor.close()
         db.close()
-
-@app.route('/api/timetable')
-def get_timetable():
-    course = request.args.get('course')
-    if not course: return jsonify({"error": "No course provided"}), 400
-    try:
-        res = requests.get(f"https://api.dhbw.app/rapla/lectures/{course}/events", timeout=10)
-        return jsonify(res.json())
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
 
 @app.route('/api/favorites/connection', methods=['POST', 'GET'])
 def handle_favorites():
@@ -285,11 +253,13 @@ def handle_favorites():
     if not username: return jsonify({"error": "Unauthorized"}), 401
 
     db = get_db_connection()
-    cursor = db.cursor(dictionary=True)
+    cursor = db.cursor(cursor_factory=RealDictCursor)
     try:
         if request.method == 'POST':
             data = request.json
-            cursor.execute("INSERT IGNORE INTO user_profiles (username) VALUES (%s)", (username,))
+            # Sicherstellen, dass der User existiert (Postgres Ersatz für INSERT IGNORE)
+            cursor.execute("INSERT INTO user_profiles (username) VALUES (%s) ON CONFLICT (username) DO NOTHING", (username,))
+            
             sql = """INSERT INTO fav_connections 
                      (username, dep_time, arr_time, duration, interchanges, sections_json) 
                      VALUES (%s, %s, %s, %s, %s, %s)"""
@@ -299,7 +269,8 @@ def handle_favorites():
             return jsonify({"status": "success"})
         else:
             cursor.execute("SELECT * FROM fav_connections WHERE username = %s ORDER BY created_at DESC", (username,))
-            return jsonify(cursor.fetchall())
+            rows = cursor.fetchall()
+            return jsonify([dict(r) for r in rows])
     finally:
         cursor.close()
         db.close()
@@ -318,6 +289,16 @@ def delete_favorite(fav_id):
     finally:
         cursor.close()
         db.close()
+
+@app.route('/api/timetable')
+def get_timetable():
+    course = request.args.get('course')
+    if not course: return jsonify({"error": "No course provided"}), 400
+    try:
+        res = requests.get(f"https://api.dhbw.app/rapla/lectures/{course}/events", timeout=10)
+        return jsonify(res.json())
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

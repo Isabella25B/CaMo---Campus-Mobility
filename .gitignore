@@ -1,6 +1,5 @@
 # Docker
 .env
-mariadb_data/
 
 # IDE
 .vscode/
