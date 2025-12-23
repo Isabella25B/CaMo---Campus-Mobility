@@ -1,112 +1,136 @@
 <!DOCTYPE html>
 <html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CaMo – Verbindungen</title>
-    <link rel="stylesheet" href="/css/styles.css">
-    <style>
-        .search-container { position: relative; width: 100%; }
-        .suggest-box { 
-            position: absolute; top: 100%; left: 0; right: 0; 
-            background: white; border: 1px solid var(--color-border); 
-            border-radius: 0 0 var(--radius-md) var(--radius-md); 
-            z-index: 1000; box-shadow: var(--shadow-soft); 
-            display: none; max-height: 250px; overflow-y: auto; 
-        }
-        .suggest-item { padding: 12px; cursor: pointer; border-bottom: 1px solid #eee; font-size: 14px; }
-        .suggest-item:hover { background-color: #f5f5f5; color: var(--color-accent); }
 
-        .switch-container { display: flex; justify-content: center; margin-bottom: 25px; }
-        .mode-switch {
-            background: #eee; border-radius: 25px; display: flex; padding: 4px;
-            width: 100%; position: relative; cursor: pointer; user-select: none;
-        }
-        .mode-switch label { flex: 1; text-align: center; padding: 10px 0; z-index: 2; cursor: pointer; font-size: 14px; font-weight: 600; transition: color 0.3s ease; margin: 0; }
-        .mode-switch .slider {
-            position: absolute; top: 4px; left: 4px; width: calc(50% - 4px); height: calc(100% - 8px);
-            background: linear-gradient(90deg, var(--color-accent), var(--color-accent-soft));
-            border-radius: 21px; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        #mode_home:checked ~ .mode-switch .slider { transform: translateX(100%); }
-        #mode_uni:checked ~ .mode-switch label[for="mode_uni"], #mode_home:checked ~ .mode-switch label[for="mode_home"] { color: white; }
-        .mode-radio { display: none; }
+    <!-- Global Styles -->
+    <link rel="stylesheet" href="/css/styles.css" />
 
-        .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 14px; color: var(--color-muted); }
-        .btn-search {
-            background: linear-gradient(90deg, var(--color-accent), var(--color-accent-soft));
-            color: white; border: none; padding: 12px; border-radius: 8px;
-            cursor: pointer; width: 100%; font-weight: bold; margin-top: 10px;
-        }
-        .leg { border-left: 3px solid var(--color-accent); padding-left: 15px; margin: 15px 0; font-size: 14px; }
-        .arrow { color: var(--color-muted-soft); font-size: 0.9em; margin-left: 15px; display: block; }
-        hr { border: 0; border-top: 1px solid #eee; margin: 12px 0; }
-        .journey-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; color: var(--color-accent); }
-        
-        .fav-button { background: none; border: 1px solid #ddd; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #888; transition: all 0.3s ease; }
-        /* Änderung: Herz wird rot und gefüllt, wenn aktiv */
-        .fav-button.active { color: #e74c3c; border-color: #e74c3c; background-color: #fdf2f2; }
-    </style>
-</head>
-<body>
+    <!-- Seiten-spezifisch -->
+    <link rel="stylesheet" href="/css/verbindungen.css" />
+  </head>
+
+  <body>
     <div class="sidebar">
-        <div class="sidebar-header"><img src="/Logo.png" alt="Logo" class="sidebar-logo" /></div>
-        <h2>APPS</h2>
-        <a href="/">Start</a>
-        <a href="/verbindungen" class="active">Verbindungen</a>
-        <a href="/favoriten">Favoriten</a>
-        <a href="/stundenplan">Stundenplan</a>
-        <a href="/karte">Interaktive Karte</a>
+      <div class="sidebar-header">
+        <img src="/Logo.png" alt="Logo" class="sidebar-logo" />
+      </div>
+      <h2>APPS</h2>
+      <a href="/">Start</a>
+      <a href="/verbindungen" class="active">Verbindungen</a>
+      <a href="/favoriten">Favoriten</a>
+      <a href="/stundenplan">Stundenplan</a>
+      <a href="/karte">Interaktive Karte</a>
     </div>
 
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
     <div class="content">
-        <div class="page-shell">
-            <div class="topbar">
-                <div class="topbar-left">
-                    <span class="breadcrumbs">Apps /</span>
-                    <span class="page-name">Verbindungen</span>
-                </div>
-            </div>
-            <div class="headline-bar"><h1 class="headline-title">Campus VVS Navigator</h1></div>
-
-            <div class="page-content page-content--single">
-                <div class="card">
-                    <div class="input-group">
-                        <label>Richtung:</label>
-                        <div class="switch-container">
-                            <input type="radio" name="mode" value="to_uni" id="mode_uni" class="mode-radio" checked onchange="updateLabels(true)">
-                            <input type="radio" name="mode" value="to_home" id="mode_home" class="mode-radio" onchange="updateLabels(false)">
-                            <div class="mode-switch">
-                                <div class="slider"></div>
-                                <label for="mode_uni">Anfahrt Uni</label>
-                                <label for="mode_home">Rückfahrt Heim</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="input-group">
-                        <label id="stopLabel">Starthaltestelle:</label>
-                        <div class="search-container">
-                            <input type="text" id="userStop" placeholder="Name tippen..." autocomplete="off">
-                            <input type="hidden" id="userStopId">
-                            <div id="suggestBox" class="suggest-box"></div>
-                        </div>
-                    </div>
-
-                    <div class="input-row" style="display:flex; gap:10px;">
-                        <div class="input-group" style="flex:1;"><label>Datum:</label><input type="date" id="date"></div>
-                        <div class="input-group" style="flex:1;"><label>Uhrzeit:</label><input type="time" id="time"></div>
-                    </div>
-                    <button class="btn-search" onclick="getConnections()">🔍 Verbindungen finden</button>
-                </div>
-                <div id="results"></div>
-            </div>
+      <div class="page-shell">
+        <div class="topbar">
+          <button
+            class="mobile-menu-btn"
+            id="mobileMenuBtn"
+            aria-label="Menü öffnen"
+          >
+            ☰
+          </button>
+          <div class="topbar-left"></div>
         </div>
+
+        <div class="headline-bar">
+          <h1 class="headline-title">Campus VVS Navigator</h1>
+        </div>
+
+        <div class="page-content page-content--single">
+          <div class="card">
+            <div class="input-group">
+              <label>Richtung:</label>
+
+              <div class="switch-container">
+                <input
+                  type="radio"
+                  name="mode"
+                  id="mode_uni"
+                  value="to_uni"
+                  class="mode-radio"
+                  checked
+                  onchange="updateLabels(true)"
+                />
+                <input
+                  type="radio"
+                  name="mode"
+                  id="mode_home"
+                  value="from_uni"
+                  class="mode-radio"
+                  onchange="updateLabels(false)"
+                />
+
+                <div class="mode-switch">
+                  <div class="slider"></div>
+                  <label for="mode_uni">Anfahrt Uni</label>
+                  <label for="mode_home">Rückfahrt Heim</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label id="stopLabel">Starthaltestelle:</label>
+              <div class="search-container">
+                <input
+                  type="text"
+                  id="userStop"
+                  placeholder="Name tippen..."
+                  autocomplete="off"
+                />
+                <input type="hidden" id="userStopId" />
+                <div id="suggestBox" class="suggest-box"></div>
+              </div>
+            </div>
+
+            <div class="input-row" style="display: flex; gap: 10px">
+              <div class="input-group" style="flex: 1">
+                <label>Datum:</label>
+                <input type="date" id="date" />
+              </div>
+              <div class="input-group" style="flex: 1">
+                <label>Uhrzeit:</label>
+                <input type="time" id="time" />
+              </div>
+            </div>
+
+            <button class="btn-search" onclick="getConnections()">
+              🔍 Verbindungen finden
+            </button>
+          </div>
+
+          <div id="results"></div>
+        </div>
+      </div>
     </div>
 
     <script src="/js/config.js"></script>
     <script>
+      const menuBtn = document.getElementById("mobileMenuBtn");
+      const sidebar = document.querySelector(".sidebar");
+      const overlay = document.getElementById("sidebarOverlay");
+
+      if (menuBtn) {
+        menuBtn.addEventListener("click", () => {
+          sidebar.classList.add("open");
+          overlay.classList.add("show");
+        });
+      }
+
+      if (overlay) {
+        overlay.addEventListener("click", () => {
+          sidebar.classList.remove("open");
+          overlay.classList.remove("show");
+        });
+      }
+
         // Init
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('date').value = today;
@@ -183,5 +207,5 @@
             }
         }
     </script>
-</body>
+  </body>
 </html>

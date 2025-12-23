@@ -54,15 +54,15 @@ STATIC_EFA_PARAMS = {
     "searchLimitMinutes": 360, 
     "serverInfo": 1, 
     "trITArrMOT": 100,
-    "trITArrMOTvalue": 15, 
+    "trITArrMOTvalue": 0, 
     "trITDepMOT": 100, 
-    "trITDepMOTvalue": 15,
+    "trITDepMOTvalue": 0,
     "type_destination": "any", 
     "type_origin": "any", 
     "useElevationData": 1,
     "useLocalityMainStop": 0, 
     "useRealtime": 1, 
-    "useUT": 1, 
+    "useUT": 0, 
     "version": "10.2.10.139"
 }
 
@@ -168,7 +168,7 @@ def get_connections():
     user_stop_id = request.args.get('userStopId')
     t_date = request.args.get('date') 
     t_time = request.args.get('time')
-    
+
     try:
         user_buffer = int(request.args.get('buffer', 0))
         total_buffer_minutes = user_buffer + 10 
@@ -178,15 +178,17 @@ def get_connections():
     results = []
     try:
         base_time = datetime.strptime(t_time, "%H%M")
+        # "Quick and Dirty" Fix: 60 Minuten korrigieren
+        corrected_time = base_time + timedelta(hours=1)
     except ValueError:
         return jsonify({"error": "Ungültiges Zeitformat"}), 400
 
     for uni in UNI_STOPS:
         if mode == 'to_uni':
-            search_dt = base_time - timedelta(minutes=total_buffer_minutes)
+            search_dt = corrected_time - timedelta(minutes=total_buffer_minutes)
             origin, dest, t_type = user_stop_id, uni["id"], "arr"
         else:
-            search_dt = base_time + timedelta(minutes=total_buffer_minutes)
+            search_dt = corrected_time + timedelta(minutes=total_buffer_minutes)
             origin, dest, t_type = uni["id"], user_stop_id, "dep"
             
         search_time = search_dt.strftime("%H%M")

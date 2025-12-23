@@ -5,3 +5,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 EXPOSE 5000
 CMD ["python", "vvs_app.py"]
+RUN apt-get update && apt-get install -y tzdata
+ENV TZ=Europe/Berlin
