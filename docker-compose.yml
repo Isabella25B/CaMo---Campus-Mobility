@@ -5,7 +5,7 @@ services:
     build: ./backend
     container_name: vvs_backend
     ports:
-      - "5000:5000"
+      - "9601:5000"
     environment:
       - PYTHONUNBUFFERED=1
       - DB_HOST=${DB_HOST} 
@@ -24,7 +24,7 @@ services:
     volumes:
       - ./frontend:/usr/share/nginx/html
     ports:
-      - "8080:80"
+      - "9600:80"
     networks:
       - camo_network
     depends_on:

@@ -97,6 +97,7 @@
     </div>
 
     <script src="auth-check.js"></script>
+    <script src="config.js"></script>
     <script>
         let allStops = [];
         let homeId = "";
@@ -111,7 +112,7 @@
 
         async function loadStops() {
             try {
-                const res = await fetch('http://localhost:5000/api/stops');
+                const res = await fetch(`${API_BASE}/api/stops`);
                 allStops = await res.json();
             } catch(e) { console.error("Stops load failed"); }
         }
@@ -119,7 +120,7 @@
         async function loadProfile() {
             const token = sessionStorage.getItem('camo_token');
             try {
-                const res = await fetch(`http://localhost:5000/api/user/profile?token=${token}`);
+                const res = await fetch(`${API_BASE}/api/user/profile?token=${token}`);
                 const d = await res.json();
                 if (d.username) {
                     document.getElementById('courseInput').value = d.timetable_link || "";
@@ -157,7 +158,7 @@
                 buffer: parseInt(document.getElementById('bufferInput').value) || 0
             };
             try {
-                await fetch('http://localhost:5000/api/user/profile', {
+                await fetch(`${API_BASE}/api/user/profile`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': token },
                     body: JSON.stringify(data)
                 });
@@ -170,7 +171,7 @@
             const container = document.getElementById('timetable');
             container.innerHTML = "<p style='grid-column:1/-1; text-align:center;'>⌛ Lade Plan...</p>";
             try {
-                const res = await fetch(`http://localhost:5000/api/timetable?course=${course}`);
+                const res = await fetch(`${API_BASE}/api/timetable?course=${course}`);
                 const data = await res.json();
                 renderTimetable(data);
                 setTimeout(() => autoLoadNextJourneys(), 300);
@@ -232,7 +233,7 @@
 
         async function fetchConn(card, mode, date, time, buffer, pos) {
             try {
-                const res = await fetch(`http://localhost:5000/api/connections?mode=${mode}&userStopId=${homeId}&date=${date}&time=${time}&buffer=${buffer}`);
+                const res = await fetch(`${API_BASE}/api/connections?mode=${mode}&userStopId=${homeId}&date=${date}&time=${time}&buffer=${buffer}`);
                 const data = await res.json();
                 if(data.journeys && data.journeys.length > 0) {
                     const j = data.journeys[0];
