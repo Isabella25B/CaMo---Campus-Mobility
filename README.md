@@ -62,4 +62,8 @@ Für das Deployment auf einem Server muss die API-Adresse in der Datei `frontend
 > **Education Only:** Dieses Projekt wurde ausschließlich zu Bildungszwecken im Rahmen des Studiums entwickelt.
 * **Zeit-Offset**: Aktuell ist bei der Verbindungssuche ein manueller Offset von +1 Stunde implementiert (vvs_app.py line 182), um falsches Zeitverhalten (Zusammenhang mit Winterzeit vermutet) auszugleichen.
 * **API-Nutzung**: Die Einbindung der VVS-Schnittstelle erfolgt experimentell. Für eine dauerhafte oder kommerzielle Nutzung der EFA-API ist eine Absprache mit dem Verkehrs- und Tarifverbund Stuttgart (VVS) erforderlich.
+* **VVS-API Verfügbarkeit**: Zeitweise Dienstausfälle der externen VVS-Schnittstellen führen zu leeren Verbindungsauskünften in der App. Erkennbar an: 
+```
+ NameResolutionError("HTTPSConnection(host='www3.vvs.de', port=443): Failed to resolve 'www3.vvs.de' ([Errno -3] Temporary failure in name resolution)")
+```
 ![VVS Server Failure](docs/screenshots/vvs_server_down.png)
