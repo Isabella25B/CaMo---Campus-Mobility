@@ -35,7 +35,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
             sessionStorage.setItem('camo_token', data.access_token);
             sessionStorage.setItem('camo_username', usernameInput);
 
-            window.location.href = 'index.html';
+            window.location.href = '/';
         } else {
             // Fehlerbehandlung
             errorMsg.innerText = data.detail || "Anmeldung fehlgeschlagen.";

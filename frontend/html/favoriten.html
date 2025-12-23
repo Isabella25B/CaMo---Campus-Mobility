@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CaMo – Favoriten</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/css/styles.css">
     <style>
         /* Spezifische Styles für die Favoriten-Liste */
         .favorites-container {
@@ -50,14 +50,14 @@
 
     <div class="sidebar">
         <div class="sidebar-header">
-            <img src="../Logo.png" alt="CaMo Logo" class="sidebar-logo" />
+            <img src="/Logo.png" alt="CaMo Logo" class="sidebar-logo" />
         </div>
         <h2>APPS</h2>
-        <a href="index.html">Start</a>
-        <a href="verbindungen.html">Verbindungen</a>
-        <a href="favoriten.html" class="active">Favoriten</a>
-        <a href="stundenplan.html">Stundenplan</a>
-        <a href="karte.html">Interaktive Karte</a>
+        <a href="/">Start</a>
+        <a href="/verbindungen">Verbindungen</a>
+        <a href="/favoriten" class="active">Favoriten</a>
+        <a href="/stundenplan">Stundenplan</a>
+        <a href="/karte">Interaktive Karte</a>
     </div>
 
     <div class="content">
@@ -82,8 +82,8 @@
         </div>
     </div>
 
-    <script src="auth-check.js"></script>
-    <script src="config.js"></script>
+    <script src="/js/auth-check.js"></script>
+    <script src="/js/config.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             if (await checkAuth()) loadFavorites();
