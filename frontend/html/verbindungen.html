@@ -54,6 +54,7 @@
                   type="radio"
                   name="mode"
                   id="mode_uni"
+                  value="to_uni"
                   class="mode-radio"
                   checked
                   onchange="updateLabels(true)"
@@ -62,6 +63,7 @@
                   type="radio"
                   name="mode"
                   id="mode_home"
+                  value="from_uni"
                   class="mode-radio"
                   onchange="updateLabels(false)"
                 />
@@ -128,6 +130,82 @@
           overlay.classList.remove("show");
         });
       }
+
+        // Init
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('date').value = today;
+        document.getElementById('date').min = today;
+        document.getElementById('time').value = new Date().toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit'});
+
+        let allStops = [];
+        async function loadStops() {
+            const res = await fetch(`${API_BASE}/api/stops`);
+            allStops = await res.json();
+        }
+        loadStops();
+
+        function updateLabels(toUni) {
+            document.getElementById('stopLabel').innerText = toUni ? 'Starthaltestelle:' : 'Zielhaltestelle:';
+        }
+
+        const input = document.getElementById('userStop'), idField = document.getElementById('userStopId'), box = document.getElementById('suggestBox');
+        input.addEventListener('input', () => {
+            const val = input.value.toLowerCase().trim();
+            box.innerHTML = ''; box.style.display = 'none';
+            if (val.length < 2) return;
+            const matches = allStops.filter(s => s.name.toLowerCase().includes(val)).slice(0, 10);
+            matches.forEach(m => {
+                const d = document.createElement('div'); d.className = 'suggest-item'; d.textContent = m.name;
+                d.onclick = () => { input.value = m.name; idField.value = m.id; box.style.display = 'none'; };
+                box.appendChild(d);
+            });
+            if(matches.length > 0) box.style.display = 'block';
+        });
+
+        async function getConnections() {
+            const stopId = idField.value;
+            if (!stopId) return alert("Haltestelle wählen!");
+            const resDiv = document.getElementById('results');
+            resDiv.innerHTML = "<p style='text-align:center'>⌛ Suche läuft...</p>";
+            
+            const mode = document.querySelector('input[name="mode"]:checked').value;
+            const date = document.getElementById('date').value.replace(/-/g, '');
+            const time = document.getElementById('time').value.replace(':', '');
+
+            try {
+                const res = await fetch(`${API_BASE}/api/connections?mode=${mode}&userStopId=${encodeURIComponent(stopId)}&date=${date}&time=${time}&buffer=0`);
+                const data = await res.json();
+                resDiv.innerHTML = "";
+                data.journeys.forEach(j => {
+                    resDiv.innerHTML += `
+                        <div class="card" style="margin-top:15px;">
+                            <div class="journey-header">
+                                <span>${j.dep} - ${j.arr} (${j.duration} Min.)</span>
+                                <button class="fav-button" onclick='saveConnection(this, ${JSON.stringify(j)})'>🤍</button>
+                            </div>
+                            <div style="font-size:12px; color:gray;">Umstiege: ${j.interchanges}</div><hr>
+                            ${j.sections.map(s => `<div class="leg"><strong>${s.line}</strong>: ${s.from} (${s.departure})<br><span class="arrow">↳ an ${s.to} (${s.arrival})</span></div>`).join("")}
+                        </div>`;
+                });
+            } catch (e) { resDiv.innerHTML = "Fehler bei der Suche."; }
+        }
+
+        async function saveConnection(btn, j) {
+            const token = sessionStorage.getItem('camo_token');
+            if (!token) return alert("Bitte logge dich ein!");
+
+            const res = await fetch(`${API_BASE}/api/favorites/connection`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': token },
+                body: JSON.stringify(j)
+            });
+            if (res.ok) {
+                // Änderung: Button-Zustand anpassen
+                btn.classList.add('active');
+                btn.innerHTML = '❤️';
+                alert("Favorit gespeichert! ⭐");
+            }
+        }
     </script>
   </body>
 </html>
