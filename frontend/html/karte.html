@@ -23,15 +23,22 @@
       <a href="/karte" class="active">Interaktive Karte</a>
     </div>
 
+    <!-- Overlay für Mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
     <!-- Inhalt rechts -->
     <div class="content">
       <div class="page-shell">
         <!-- graue Leiste oben -->
         <div class="topbar">
-          <div class="topbar-left">
-            <span class="breadcrumbs">Apps /</span>
-            <span class="page-name">Karte</span> 
-          </div>
+          <button
+            class="mobile-menu-btn"
+            id="mobileMenuBtn"
+            aria-label="Menü öffnen"
+          >
+            ☰
+          </button>
+          <div class="topbar-left"></div>
         </div>
         <!-- roter Balken mit Titel -->
         <div class="headline-bar">
@@ -52,5 +59,24 @@
         </div>
       </div>
     </div>
+    <script>
+      const menuBtn = document.getElementById("mobileMenuBtn");
+      const sidebar = document.querySelector(".sidebar");
+      const overlay = document.getElementById("sidebarOverlay");
+
+      if (menuBtn) {
+        menuBtn.addEventListener("click", () => {
+          sidebar.classList.add("open");
+          overlay.classList.add("show");
+        });
+      }
+
+      if (overlay) {
+        overlay.addEventListener("click", () => {
+          sidebar.classList.remove("open");
+          overlay.classList.remove("show");
+        });
+      }
+    </script>
   </body>
 </html>

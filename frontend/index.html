@@ -23,15 +23,21 @@
       <a href="/karte">Interaktive Karte</a>
     </div>
 
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
     <!-- Inhalt rechts -->
     <div class="content">
       <div class="page-shell">
         <!-- obere graue Leiste -->
         <div class="topbar">
-          <div class="topbar-left">
-            <span class="breadcrumbs">Apps /</span>
-            <span class="page-name">Start</span>  
-          </div>
+          <button
+            class="mobile-menu-btn"
+            id="mobileMenuBtn"
+            aria-label="Menü öffnen"
+          >
+            ☰
+          </button>
+          <div class="topbar-left"></div>
           <div class="topbar-right">
             <a id="auth-button" class="sign-in-button" href="/login">Sign in</a>
           </div>
@@ -99,26 +105,47 @@
 
         // Wenn ein Token existiert (User ist eingeloggt)
         if (token) {
-            // Titel anpassen
-            if (username) {
-                titleElement.innerText = `Willkommen zurück, ${username}!`;
-            }
-
-            // Button zu Logout umbauen
-            if (authButton) {
-                authButton.innerText = "Logout";
-                authButton.href = "#";
-                authButton.style.backgroundColor = "#d9534f"; // Rot für Logout
-                
-                authButton.addEventListener("click", (e) => {
-                    e.preventDefault();
-                    sessionStorage.removeItem("camo_token");
-                    sessionStorage.removeItem("camo_username");
-                    window.location.reload(); // Seite neu laden
-                });
-              }
+          // Titel anpassen
+          if (username) {
+            titleElement.innerText = `Willkommen zurück, ${username}!`;
           }
+
+          // Button zu Logout umbauen
+          if (authButton) {
+            authButton.innerText = "Logout";
+            authButton.href = "#";
+            authButton.style.backgroundColor = "#d9534f"; // Rot für Logout
+            authButton.style.color = "white";
+            authButton.style.textDecoration = "none";
+
+            authButton.addEventListener("click", (e) => {
+              e.preventDefault();
+              sessionStorage.removeItem("camo_token");
+              sessionStorage.removeItem("camo_username");
+              window.location.reload(); // Seite neu laden
+            });
+          }
+        }
       });
+    </script>
+    <script>
+      const menuBtn = document.getElementById("mobileMenuBtn");
+      const sidebar = document.querySelector(".sidebar");
+      const overlay = document.getElementById("sidebarOverlay");
+
+      if (menuBtn) {
+        menuBtn.addEventListener("click", () => {
+          sidebar.classList.add("open");
+          overlay.classList.add("show");
+        });
+      }
+
+      if (overlay) {
+        overlay.addEventListener("click", () => {
+          sidebar.classList.remove("open");
+          overlay.classList.remove("show");
+        });
+      }
     </script>
   </body>
 </html>

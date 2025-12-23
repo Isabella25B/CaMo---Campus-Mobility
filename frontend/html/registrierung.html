@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CaMo – Registrierung</title>
     <link rel="stylesheet" href="/css/styles.css" />
+    <link rel="stylesheet" href="/css/registrierung.css" />
   </head>
 
   <body class="login-body">
@@ -39,12 +40,14 @@
           <button id="register-btn" class="login-btn" type="submit">
             Konto erstellen
           </button>
-          
-          <p style="margin-top: 15px;">Bereits ein Konto?</p>
-          <a href="/login">Hier zum Login</a>
-          
-          <p id="register-error" class="login-error" style="display: none; color: red;"></p>
-          <p id="register-success" style="display: none; color: green;">Registrierung erfolgreich! Leite zum Login weiter...</p>
+
+          <p class="register-hint">Bereits ein Konto?</p>
+          <a class="register-link" href="/login">Hier zum Login</a>
+
+          <p id="register-error" class="register-error"></p>
+          <p id="register-success" class="register-success">
+            Registrierung erfolgreich! Leite zum Login weiter...
+          </p>
         </form>
       </div>
     </div>
