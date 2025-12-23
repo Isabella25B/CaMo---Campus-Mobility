@@ -36,7 +36,7 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
             
             // Nach 2 Sekunden zum Login weiterleiten
             setTimeout(() => {
-                window.location.href = 'login.html';
+                window.location.href = '/login';
             }, 2000);
         } else {
             // Fehler vom Server (z.B. User existiert schon)

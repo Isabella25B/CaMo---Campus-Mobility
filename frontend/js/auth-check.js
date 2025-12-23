@@ -45,7 +45,7 @@ function showLoginMessage(headline, pageContent, customMsg) {
                 <h2 style="color: var(--color-accent); margin-bottom: 10px;">🔒 Anmeldung erforderlich</h2>
                 <p style="color: var(--color-muted);">${customMsg || "Logge dich ein, um deinen persönlichen Bereich zu sehen."}</p>
                 <div style="margin-top: 25px;">
-                    <a href="login.html" class="sign-in-button" style="text-decoration: none; padding: 10px 25px;">Jetzt zum Login</a>
+                    <a href="/login" class="sign-in-button" style="text-decoration: none; padding: 10px 25px;">Jetzt zum Login</a>
                 </div>
             </div>
         `;
@@ -62,7 +62,7 @@ function updateTopbar() {
         authButton.onclick = (e) => {
             e.preventDefault();
             sessionStorage.clear();
-            window.location.href = 'login.html';
+            window.location.href = '/login';
         };
         
         const userDisplay = document.createElement('span');
