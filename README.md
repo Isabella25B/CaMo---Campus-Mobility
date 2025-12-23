@@ -9,9 +9,12 @@ Die Flask-basierte Web-App CaMo unterstützt Studierende der DHBW Technik bei ei
 
 ## 1. ✨ Kernfunktionen
 * **aktuelle Abfahrtstafel** der beiden Haltestellen `Rosenberg-/Seidenstraße` und `Linden-Museum`
+![Live Abfahrtstafel](docs/screenshots/abfahrtstafel.png)
 * **Verbindungssuche** mit intelligenter Richtungswahl zwischen „Anfahrt Uni" (Fokus auf Ankunftszeit) und „Rückfahrt Heim“ (Fokus auf Abfahrtszeit) und einkalkulierter Pufferzeit für den Fußweg von der Hochschule zur Haltestelle.
+![Verbindungssuche](docs/screenshots/verbindungssuche.png)
 * **Favoriten-System**: personalisierter Speicher für häufig genutzte Verbindungen.
 * **Verknüpfung des Vorlesungsplans**: mithilfe der `dhbw.app` Applikation werden die RAPLA Vorlesungspläne ausgelesen und für die nächsten drei Termine An- und Abreise automatisch geladen.
+![Vorlesungsplan](docs/screenshots/vorlesungsplan.png)
 * Integrierte Google Maps **Umgebungskarte** zur schnellen Orientierung und zum Einsehen der Haltestellen rund um den Campus.
 
 ## 2. 🚀 Installation & Setup
