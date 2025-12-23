@@ -1,0 +1,44 @@
+/* =========================================
+   Registrierung – seiten-spezifische Styles
+   ========================================= */
+
+/* Text + Links unter dem Button */
+.register-hint {
+  margin-top: 15px;
+}
+
+.register-link {
+  display: inline-block;
+  margin-top: 4px;
+  text-decoration: none;
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.register-link:hover {
+  text-decoration: underline;
+}
+
+/* Statusmeldungen */
+.register-error {
+  display: none;
+  margin-top: 12px;
+  color: #b00020;
+}
+
+.register-success {
+  display: none;
+  margin-top: 12px;
+  color: #1b7f3a;
+}
+
+/* Handy: Card etwas kompakter */
+@media (max-width: 600px) {
+  .login-card {
+    padding: 22px;
+  }
+
+  .login-title {
+    font-size: 26px;
+  }
+}

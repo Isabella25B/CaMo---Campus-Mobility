@@ -370,15 +370,15 @@ body {
 
 /* Container für Elemente, die nebeneinander stehen sollen */
 .input-row {
-    display: flex;
-    gap: 16px;
-    width: 100%;
+  display: flex;
+  gap: 16px;
+  width: 100%;
 }
 
 /* Sorgt dafür, dass die Gruppen gleichmäßig wachsen und nicht überlappen */
 .input-row .input-group {
-    flex: 1;
-    min-width: 0; /* Verhindert das "Rausdrücken" aus der Reihe */
+  flex: 1;
+  min-width: 0; /* Verhindert das "Rausdrücken" aus der Reihe */
 }
 
 /* Standard-Styling für alle Formularfelder */
@@ -386,19 +386,77 @@ input[type="date"],
 input[type="time"],
 input[type="text"],
 select {
-    width: 100%;
-    box-sizing: border-box; /* WICHTIG: Padding wird nicht zur Breite addiert */
-    padding: 10px;
-    border: 1px solid var(--color-border);
-    border-radius: 8px;
-    font-size: 14px;
-    background-color: #fff;
+  width: 100%;
+  box-sizing: border-box; /* WICHTIG: Padding wird nicht zur Breite addiert */
+  padding: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: #fff;
 }
 
 /* Optional: Damit es auf dem Handy untereinander springt */
 @media (max-width: 500px) {
-    .input-row {
-        flex-direction: column;
-        gap: 10px;
-    }
+  .input-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+/* =========================
+   Mobile Sidebar (Responsive)
+   ========================= */
+
+.mobile-menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 26px;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+/* Overlay hinter Sidebar */
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 998;
+  display: none;
+}
+
+/* -------- Mobile Layout -------- */
+@media (max-width: 768px) {
+  .mobile-menu-btn {
+    display: block;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0; /* bleibt 0 */
+    height: 100%;
+    width: 260px;
+    z-index: 999;
+
+    /* WICHTIG: komplett raus schieben */
+    transform: translateX(-110%);
+    transition: transform 0.3s ease;
+
+    /* damit sie wirklich “weg” ist */
+    pointer-events: none;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+    pointer-events: auto;
+  }
+
+  .sidebar-overlay.show {
+    display: block;
+  }
+
+  .content {
+    margin-left: 0;
+    padding: 0;
+  }
 }
