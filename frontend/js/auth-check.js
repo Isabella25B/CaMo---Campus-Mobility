@@ -1,5 +1,17 @@
 /**
- * Zentrale Authentifizierungsprüfung für CaMo
+ * Frontend: auth-check.js
+ * Purpose: Zentrale Authentifizierungsprüfung und Topbar-/UI-Updates.
+ *
+ * Funktionen:
+ * - `checkAuth()` prüft lokal und per Server, ob ein Token gültig ist.
+ * - `showLoginMessage(headline, pageContent, customMsg)` zeigt einen
+ *   Login-Hinweis an, wenn kein gültiger Token vorhanden ist.
+ * - `updateTopbar()` passt Topbar/Anmelde-Button an, wenn angemeldet.
+ */
+
+/**
+ * Prüft das gespeicherte Token lokal und beim Auth-Server und aktualisiert die UI.
+ * @returns {Promise<boolean>} true wenn authentifiziert (oder Fallback), sonst false
  */
 async function checkAuth() {
     const token = sessionStorage.getItem('camo_token');
@@ -37,6 +49,12 @@ async function checkAuth() {
     }
 }
 
+/**
+ * Zeigt eine Login-Card mit optionaler Nachricht an.
+ * @param {Element} headline Element für die Überschrift (wird gesetzt)
+ * @param {Element} pageContent Container, in den die Card eingefügt wird
+ * @param {string} [customMsg] optionale Nachricht, die angezeigt wird
+ */
 function showLoginMessage(headline, pageContent, customMsg) {
     if (headline) headline.innerText = "Zugriff beschränkt";
     if (pageContent) {
@@ -52,6 +70,10 @@ function showLoginMessage(headline, pageContent, customMsg) {
     }
 }
 
+/**
+ * Aktualisiert die Topbar, zeigt den Benutzernamen und einen Abmelden-Button an.
+ * Liest `camo_username` aus `sessionStorage` und passt das UI an.
+ */
 function updateTopbar() {
     const username = sessionStorage.getItem('camo_username');
     const authButton = document.querySelector('.sign-in-button');

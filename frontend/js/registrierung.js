@@ -1,3 +1,8 @@
+/**
+ * Frontend: registrierung.js
+ * Purpose: Handhabt das Registrierungsformular. Sendet Username/Password an
+ * den Auth-Register-Endpoint und zeigt Erfolg/Fehler im UI an.
+ */
 document.getElementById('register-form').addEventListener('submit', async (e) => {
     e.preventDefault();
 

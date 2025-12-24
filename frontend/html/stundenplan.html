@@ -1,4 +1,9 @@
 <!DOCTYPE html>
+<!--
+  Frontend: html/stundenplan.html
+  Purpose: Seite zur Anzeige des persönlichen Vorlesungsplans und automatischer
+  Berechnung von An-/Abreisevorschlägen für die nächsten Termine.
+-->
 <html lang="de">
   <head>
     <meta charset="UTF-8" />
@@ -94,9 +99,14 @@
     <script src="/js/auth-check.js"></script>
 
     <script>
+      /**
+       * Script für die Stundenplan-Seite: lädt Stops/Profile, rendert Stundenplan
+       * und lädt zugehörige Verbindungen für kommende Unterrichtstage.
+       */
       let allStops = [];
       let homeId = "";
 
+      // Initialisierung: Auth prüfen -> Stops & Profile laden -> Autocomplete
       document.addEventListener("DOMContentLoaded", async () => {
         // Erst Auth prüfen, DANN den Rest laden
         const isAuthenticated = await checkAuth();
@@ -107,6 +117,9 @@
         }
       });
 
+      /**
+       * Lädt die Liste aller Haltestellen vom Backend in `allStops`.
+       */
       async function loadStops() {
         try {
           const res = await fetch(`${API_BASE}/api/stops`);
@@ -116,6 +129,10 @@
         }
       }
 
+      /**
+       * Lädt das Benutzerprofil (inkl. Home-Stop, Buffer, Timetable-Link) und
+       * füllt die Eingabefelder. Ruft bei vorhandenem Link `fetchTimetable()` auf.
+       */
       async function loadProfile() {
         const token = sessionStorage.getItem("camo_token");
         try {
@@ -141,6 +158,9 @@
         }
       }
 
+      /**
+       * Initialisiert das Autocomplete für das Home-Stop Eingabefeld anhand von `allStops`.
+       */
       function initAutocomplete() {
         const inp = document.getElementById("homeStopInput");
         const box = document.getElementById("suggestBox");
@@ -174,6 +194,9 @@
         });
       }
 
+      /**
+       * Speichert das Profil des Benutzers via API und lädt anschließend den Stundenplan neu.
+       */
       async function saveProfile() {
         const token = sessionStorage.getItem("camo_token");
         const data = {
@@ -199,6 +222,9 @@
         }
       }
 
+      /**
+       * Holt den Stundenplan für `course` vom Backend und löst das Rendern aus.
+       */
       async function fetchTimetable(course) {
         const container = document.getElementById("timetable");
         if (!container) return;
@@ -216,6 +242,10 @@
         }
       }
 
+      /**
+       * Rendert die übergebenen Events in Tages-Gruppen im DOM.
+       * @param {Array} events Array von Event-Objekten mit startTime/endTime/name
+       */
       function renderTimetable(events) {
         const container = document.getElementById("timetable");
         container.innerHTML = "";
@@ -281,6 +311,10 @@
         });
       }
 
+      /**
+       * Lädt zu den nächsten Tagen automatisch passende Verbindungen (bis 3 Karten)
+       * und ruft `loadSingleCard` für jede Karte auf.
+       */
       function autoLoadNextJourneys() {
         if (!homeId) return;
 
@@ -298,6 +332,10 @@
         futureCards.slice(0, 3).forEach((card) => loadSingleCard(card));
       }
 
+      /**
+       * Lädt für eine einzelne Tageskarte passende An-/Abreisevorschläge und
+       * fügt sie in die Karte ein.
+       */
       async function loadSingleCard(card) {
         const date = card.dataset.dateVvs;
         const times = card.querySelectorAll(".lecture-time");
@@ -325,6 +363,10 @@
         fetchConn(card, "from_uni", date, lastEnd, 10, "beforeend");
       }
 
+      /**
+       * Führt einen Connection-Request an das Backend aus und fügt das Ergebnis
+       * als kleine Connection-Box in die Karte ein.
+       */
       async function fetchConn(card, mode, date, time, buffer, pos) {
         try {
           const res = await fetch(

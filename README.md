@@ -60,6 +60,17 @@ Für das Deployment auf einem Server muss die API-Adresse in der Datei `frontend
 └── README.md
 ```
 
+## 🔁 Frontend Workflow (Kurzüberblick)
+
+- **Konfiguration:** `frontend/js/config.js` setzt `API_BASE` (localhost für Entwicklung, andernfalls Produktions-URL).
+- **Seitenaufbau:** Statische Dateien in `frontend/` (HTML), Styles in `frontend/css/` und JS-Logik in `frontend/js/`.
+- **Authentifizierung:** `auth-check.js` prüft `sessionStorage` auf `camo_token` und validiert optional beim Auth-Endpoint. Bei gültigem Token wird die Topbar angepasst (Benutzername, Logout).
+- **Verbindungs-Suche:** Nutzer erzeugt Anfrage → Frontend ruft `${API_BASE}/api/connections` → rendert `journeys` in der UI → Favoriten werden über `${API_BASE}/api/favorites/connection` gespeichert.
+- **Favoriten & Profil:** Favoriten und Nutzerprofil (z.B. `timetable_link`, `home_stop_id`, `buffer_time`) werden über die `/api/*`-Endpunkte verwaltet (`/api/user/profile`, `/api/favorites/*`).
+- **Stundenplan-Integration:** Bei vorhandenem `timetable_link` lädt das Frontend die nächsten Termine und fragt automatisch passende Verbindungen an (siehe `stundenplan.html`).
+
+> Hinweis: Alle API-Requests nutzen `API_BASE`. Für lokale Entwicklung mit `docker-compose` ist das Backend unter `http://localhost:9601` erreichbar.
+
 ## 5. ⚠️ Wichtige Hinweise (Known Issues)
 > [!IMPORTANT]
 > **Education Only:** Dieses Projekt wurde ausschließlich zu Bildungszwecken im Rahmen des Studiums entwickelt.

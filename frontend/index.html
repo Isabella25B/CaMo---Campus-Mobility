@@ -1,4 +1,9 @@
 <!DOCTYPE html>
+<!--
+  Frontend: index.html
+  Purpose: Startseite von CaMo – enthält Sidebar, Topbar, Live-Abfahrten (iframes)
+  und kleine Inline-Skripte zum Handling von Auth-Status und Mobile-Menu.
+-->
 <html lang="de">
   <head>
     <meta charset="UTF-8" />
@@ -99,6 +104,7 @@
       </div>
     </div>
 
+    <!-- Script: Auth-UI — passt Titel und Login/Logout-Button basierend auf sessionStorage an -->
     <script>
       document.addEventListener("DOMContentLoaded", () => {
         // Daten aus dem Speicher holen
@@ -132,6 +138,7 @@
         }
       });
     </script>
+    <!-- Script: Mobile-Sidebar Toggle (öffnen/schließen) -->
     <script>
       const menuBtn = document.getElementById("mobileMenuBtn");
       const sidebar = document.querySelector(".sidebar");

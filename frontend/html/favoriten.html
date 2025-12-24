@@ -1,4 +1,9 @@
 <!DOCTYPE html>
+<!--
+  Frontend: html/favoriten.html
+  Purpose: Zeigt die gespeicherten Favoriten des eingeloggten Benutzers an
+  und erlaubt das Löschen von Favoriten.
+-->
 <html lang="de">
   <head>
     <meta charset="UTF-8" />
@@ -60,12 +65,16 @@
     <script src="/js/config.js"></script>
 
     <script>
+      // Init: prüft Auth und lädt Favoriten
       document.addEventListener("DOMContentLoaded", async () => {
         if (await checkAuth()) {
           loadFavorites();
         }
       });
 
+      /**
+       * Lädt die Favoriten des Benutzers vom Backend und rendert sie in #favoritesList.
+       */
       async function loadFavorites() {
         const token = sessionStorage.getItem("camo_token");
         const res = await fetch(
@@ -111,6 +120,10 @@
         });
       }
 
+      /**
+       * Löscht ein Favorit über das Backend und lädt die Liste neu.
+       * @param {number} id Favoriten-ID
+       */
       async function deleteFavorite(id) {
         if (!confirm("Löschen?")) return;
 

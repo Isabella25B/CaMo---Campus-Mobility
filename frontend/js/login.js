@@ -1,3 +1,12 @@
+/**
+ * Frontend: login.js
+ * Purpose: Logik für das Login-Formular. Sendet Credentials an den Auth-Endpoint
+ * und speichert bei Erfolg das Access-Token in `sessionStorage`.
+ *
+ * Handler:
+ * - Submit-Handler (anonym): liest Formdaten, ruft `/auth/login` auf,
+ *   speichert `camo_token` und `camo_username` und leitet auf `/` weiter.
+ */
 document.getElementById('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
 

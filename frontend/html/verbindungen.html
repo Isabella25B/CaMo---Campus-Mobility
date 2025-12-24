@@ -1,4 +1,9 @@
 <!DOCTYPE html>
+<!--
+  Frontend: html/verbindungen.html
+  Purpose: Seite für die Verbindungs-Suche. Enthält UI-Elemente zur Auswahl
+  der Richtung, Datum/Uhrzeit, Autocomplete für Haltestellen und Ergebnisliste.
+-->
 <html lang="de">
   <head>
     <meta charset="UTF-8" />
@@ -116,6 +121,13 @@
 
     <script src="/js/config.js"></script>
     <script>
+      /*
+        Funktionen in diesem Script:
+        - loadStops(): lädt alle Haltestellen vom Backend
+        - updateLabels(toUni): passt das Label für Start/Ziel an
+        - getConnections(): führt die Suche aus und rendert Ergebnisse
+        - saveConnection(btn, j): speichert eine Verbindung als Favorit
+      */
       const menuBtn = document.getElementById("mobileMenuBtn");
       const sidebar = document.querySelector(".sidebar");
       const overlay = document.getElementById("sidebarOverlay");
@@ -141,17 +153,26 @@
         document.getElementById('time').value = new Date().toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit'});
 
         let allStops = [];
+        /**
+         * Lädt die Haltestellenliste vom Backend (`/api/stops`) und füllt `allStops`.
+         * Diese Liste wird für das Autocomplete genutzt.
+         */
         async function loadStops() {
-            const res = await fetch(`${API_BASE}/api/stops`);
-            allStops = await res.json();
+          const res = await fetch(`${API_BASE}/api/stops`);
+          allStops = await res.json();
         }
         loadStops();
 
+        /**
+         * Ändert das sichtbare Label je nach Modus (Anfahrt Uni / Rückfahrt Heim).
+         * @param {boolean} toUni true = Anfahrt Uni, false = Rückfahrt
+         */
         function updateLabels(toUni) {
-            document.getElementById('stopLabel').innerText = toUni ? 'Starthaltestelle:' : 'Zielhaltestelle:';
+          document.getElementById('stopLabel').innerText = toUni ? 'Starthaltestelle:' : 'Zielhaltestelle:';
         }
 
         const input = document.getElementById('userStop'), idField = document.getElementById('userStopId'), box = document.getElementById('suggestBox');
+        // Autocomplete: Filtert `allStops` und zeigt Vorschläge im Suggest-Box
         input.addEventListener('input', () => {
             const val = input.value.toLowerCase().trim();
             box.innerHTML = ''; box.style.display = 'none';
@@ -165,6 +186,10 @@
             if(matches.length > 0) box.style.display = 'block';
         });
 
+        /**
+         * Führt die Verbindungssuche aus und rendert die Ergebnis-Karten in `#results`.
+         * Liest Modus, Datum, Zeit und ausgewählte Haltestelle aus dem Formular.
+         */
         async function getConnections() {
             const stopId = idField.value;
             if (!stopId) return alert("Haltestelle wählen!");
@@ -193,6 +218,12 @@
             } catch (e) { resDiv.innerHTML = "Fehler bei der Suche."; }
         }
 
+        /**
+         * Speichert eine Verbindung als Favorit über das Backend. Benötigt ein Token
+         * in `sessionStorage` (camo_token).
+         * @param {Element} btn Button-Element (wird visuell aktualisiert)
+         * @param {Object} j Verbindungsobjekt (Journey)
+         */
         async function saveConnection(btn, j) {
             const token = sessionStorage.getItem('camo_token');
             if (!token) return alert("Bitte logge dich ein!");
